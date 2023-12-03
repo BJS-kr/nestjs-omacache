@@ -168,7 +168,7 @@ class SomeController {
     }
 
     // will unset cache of some + p1 + p2
-    @Patch('/:p2/:p2')
+    @Patch('/:p1/:p2')
     @InMemoryCache({
         key: 'some',
         kind: 'temporal',

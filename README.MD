@@ -1,5 +1,10 @@
 # Cache Decorator Factory for NestJS
 
+## Migrate to >= 1.1!
+
+There was a bug that timer keep stacked in the event loop below version 1.1!  
+please migrate to 1.1 or above
+
 ## Contact
 
 js.byeon@teamsparta.co

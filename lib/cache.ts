@@ -1,9 +1,9 @@
-import { SetMetadata } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { CACHE } from './constants';
-import 'reflect-metadata';
-import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from './types';
-import { isBust, isPersistent, isTemporal } from './guard';
+import { SetMetadata } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { CACHE } from "./constants";
+import "reflect-metadata";
+import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
+import { isBust, isPersistent, isTemporal } from "./guard";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
@@ -11,7 +11,7 @@ export const intervalTimerMap = new Map<string, boolean>();
 export const makeParamBasedCacheKey = (
   key: string,
   args: any[],
-  paramIndex: number[] | undefined,
+  paramIndex: number[] | undefined
 ) =>
   !paramIndex
     ? key
@@ -23,7 +23,7 @@ export const Cache =
     return (
       target: any,
       _propertyKey: string,
-      descriptor: PropertyDescriptor,
+      descriptor: PropertyDescriptor
     ) => {
       const originalMethod = descriptor.value;
       const { key } = cacheOptions;
@@ -35,7 +35,7 @@ export const Cache =
 
         descriptor.value = async function () {
           if (arguments.length)
-            throw new Error('arguments are not supported for persistent cache');
+            throw new Error("arguments are not supported for persistent cache");
 
           if (storage.has(key)) return storage.get(key);
 
@@ -82,7 +82,7 @@ export const Cache =
 
           storage.set(cacheKey, result);
 
-          setTimeout(() => storage.delete(cacheKey), ttl! * 1000);
+          setTimeout(() => storage.delete(cacheKey), ttl * 1000);
 
           return result;
         };

@@ -70,7 +70,6 @@ class AppController {
         key: 'other key',
         kind: 'temporal',
         ttl: 60 * 10, // 10 mins
-        set: true,
         // You have to specify parameter indexes which will be referenced dynamically
         // In this case, cache key will be concatenated string of key, id param, q2 query
         paramIndex: [0, 2]
@@ -135,12 +134,35 @@ class SomeController {
 // keep in mind that cache control by key is supported for temporal cache only
 @Controller()
 class SomeController {
-    // this route sets cache for key 'some'
     @Get()
+    @InMemoryCache({
+        key: 'hello',
+        kind: 'persistent',
+        refreshIntervalSec: 10 * 60
+    })
+    getSomethingHeavy() {
+        ...
+    }
+
+    @Put()
+    // in this case, we are busting persistent cache
+    // after busting persistent cache, when busting method is done,
+    // persistent cached method(getSomethingHeavy in this case) will invoked immediately
+    // so you can still get the updated cache from persistent cache route!
+    @InMemoryCache({
+        key: 'hello',
+        kind: 'bust',
+    })
+    updateSomethingHeavy() {
+        ...
+    }
+
+
+    // this route sets cache for key 'some'
+    @Get('/some')
     @InMemoryCache({
         key: 'some',
         kind:'temporal',
-        set: true,
         ttl: 30,
     })
     getSome() {
@@ -148,11 +170,10 @@ class SomeController {
     }
 
     // and this route will unset cache for key 'some', before the 'some' cache's ttl expires
-    @Patch()
+    @Patch('/some')
     @InMemoryCache({
         key: 'some',
-        kind: 'temporal',
-        set: false
+        kind: 'bust',
     })
     updateSome() {
         ...
@@ -163,7 +184,6 @@ class SomeController {
     @InMemoryCache({
         key: 'some',
         kind:'temporal',
-        set: true,
         ttl: 30,
         paramIndex: [0, 1]
     })
@@ -175,8 +195,7 @@ class SomeController {
     @Patch('/:p1/:p2')
     @InMemoryCache({
         key: 'some',
-        kind: 'temporal',
-        set: false,
+        kind: 'bust',
         paramIndex: [0, 1]
     })
     updateSomeOther(@Param('p1') p1: string, @Param('p2') p2: string) {

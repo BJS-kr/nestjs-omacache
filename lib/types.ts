@@ -1,7 +1,7 @@
 type CacheOptionSchema = {
   temporal: { ttl: number; paramIndex?: number[] };
   persistent: {
-    refreshIntervalSec: number;
+    refreshIntervalSec?: number;
   };
   bust: { paramIndex?: number[] };
 };

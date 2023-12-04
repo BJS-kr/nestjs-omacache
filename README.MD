@@ -64,6 +64,8 @@ class AppController {
         key: 'some key',
         // persistent cache sets cache automatically on server start
         kind: 'persistent',
+        // refresh interval is optional
+        // use it if you want cache refreshing
         refreshIntervalSec: 60 * 60 * 3 // 3 hours
     })
     async noParameterMethod() {
@@ -143,7 +145,6 @@ class SomeController {
     @InMemoryCache({
         key: 'hello',
         kind: 'persistent',
-        refreshIntervalSec: 10 * 60
     })
     getSomethingHeavy() {
         ...

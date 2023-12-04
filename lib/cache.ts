@@ -1,9 +1,9 @@
 import { SetMetadata } from "@nestjs/common";
 import { EventEmitter } from "events";
 import { CACHE } from "./constants";
-import "reflect-metadata";
 import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
 import { isBust, isPersistent, isTemporal } from "./guard";
+import "reflect-metadata";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
@@ -42,7 +42,7 @@ export const Cache =
           const result = await originalMethod.call(this);
           storage.set(key, result);
 
-          if (!intervalTimerMap.has(key)) {
+          if (refreshIntervalSec && !intervalTimerMap.has(key)) {
             setInterval(() => {
               const result = originalMethod.call(this);
 

@@ -37,12 +37,12 @@ export const Cache =
           if (arguments.length)
             throw new Error("arguments are not supported for persistent cache");
 
-          if (storage.has(key)) return storage.get(key);
+          if (await storage.has(key)) return storage.get(key);
 
           const result = await originalMethod.call(this);
           storage.set(key, result);
 
-          if (refreshIntervalSec && !intervalTimerMap.has(key)) {
+          if (refreshIntervalSec && !(await intervalTimerMap.has(key))) {
             setInterval(() => {
               const result = originalMethod.call(this);
 
@@ -76,7 +76,7 @@ export const Cache =
         descriptor.value = async function (...args: any[]) {
           const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
 
-          if (storage.has(cacheKey)) return storage.get(cacheKey);
+          if (await storage.has(cacheKey)) return storage.get(cacheKey);
 
           const result = await originalMethod.apply(this, args);
 
@@ -93,7 +93,7 @@ export const Cache =
           const { paramIndex } = cacheOptions;
           const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
 
-          storage.delete(cacheKey);
+          await storage.delete(cacheKey);
 
           const result = await originalMethod.apply(this, args);
 

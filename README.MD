@@ -46,7 +46,21 @@ export class AppModule {}
 ```typescript
 // imported 'Cache' is factory to receive storage that implements ICacheStorage
 // in this example, we'll initialize in-memory cache
-import { Cache } from "@teamsparta/cache";
+import { Cache, ICacheStorage } from "@teamsparta/cache";
+
+// for example, we can use redis for storage
+// What ever your implementation is, it must satisfies ICacheStorage interface.
+class RedisStorage implements ICacheStorage {
+    get(key: string): any {...}
+    set(key: string, val: any): any {...}
+    has(key: string): boolean {...}
+    delete(key: string): boolean {...}
+}
+
+// Then you can make External Redis Cache!
+const ExternalCache = Cache({ storage: new RedisStorage() })
+
+// ...or
 // Map implements all the signatures of ICacheStorage
 // so you can just pass Map instance
 const InMemoryCache = Cache({ storage: new Map() satisfies ICacheStorage });
@@ -59,7 +73,7 @@ const InMemoryCache = Cache({ storage: new Map() satisfies ICacheStorage });
 @Controller()
 class AppController {
     @Get()
-    @InMemoryCache({
+    @ExternalCache({
         // persistent cache also needs key to control cache internally
         key: 'some key',
         // persistent cache sets cache automatically on server start
@@ -73,7 +87,7 @@ class AppController {
     }
 
     @Get('/:id')
-    @InMemoryCache({
+    @ExternalCache({
         key: 'other key',
         kind: 'temporal',
         ttl: 60 * 10, // 10 mins
@@ -187,7 +201,7 @@ class SomeController {
 
     // above operation also can handle parameter based cache
     @Get('/:p1/:p2')
-    @InMemoryCache({
+    @ExternalCache({
         key: 'some',
         kind:'temporal',
         ttl: 30,
@@ -199,7 +213,7 @@ class SomeController {
 
     // will unset cache of some + p1 + p2
     @Patch('/:p1/:p2')
-    @InMemoryCache({
+    @ExternalCache({
         key: 'some',
         kind: 'bust',
         paramIndex: [0, 1]
@@ -213,4 +227,5 @@ class SomeController {
 
 ## Caution
 
-persistent cache must used on method without parameters, otherwise, it will throw error that presents persistent cache cannot applied to method that have parameters.
+1. persistent cache must used on method without parameters, otherwise, it will throw error that presents persistent cache cannot applied to method that have parameters.
+2. cache set does not awaited internally for not interrupting business logics. only when integrity matters, it awaits(i.e. 'has' method). If you implemented all ICacheStorage signatures synchronously, you don't have to concern about it.

@@ -51,10 +51,10 @@ import { Cache, ICacheStorage } from "@teamsparta/cache";
 // for example, we can use redis for storage
 // What ever your implementation is, it must satisfies ICacheStorage interface.
 class RedisStorage implements ICacheStorage {
-    get(key: string): any {...}
-    set(key: string, val: any): any {...}
-    has(key: string): boolean | Promise<boolean> {...}
-    delete(key: string): boolean | Promise<boolean> {...}
+    get(key: string) {...}
+    set(key: string, val: any) {...}
+    has(key: string) {...}
+    delete(key: string) {...}
 }
 
 // Then you can make External Redis Cache!

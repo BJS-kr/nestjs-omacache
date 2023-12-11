@@ -53,8 +53,8 @@ import { Cache, ICacheStorage } from "@teamsparta/cache";
 class RedisStorage implements ICacheStorage {
     get(key: string): any {...}
     set(key: string, val: any): any {...}
-    has(key: string): boolean {...}
-    delete(key: string): boolean {...}
+    has(key: string): boolean | Promise<boolean> {...}
+    delete(key: string): boolean | Promise<boolean> {...}
 }
 
 // Then you can make External Redis Cache!

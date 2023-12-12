@@ -62,9 +62,12 @@ export const Cache =
         cacheEventEmitter.once(key, (instance) => {
           descriptor.value.call(instance);
 
-          cacheEventEmitter.on(`${INTERNAL_KIND.PERSISTENT}=>${key}`, () => {
-            descriptor.value.call(instance);
-          });
+          cacheEventEmitter.on(
+            `__${INTERNAL_KIND.PERSISTENT}=>${key}__`,
+            () => {
+              descriptor.value.call(instance);
+            }
+          );
         });
       }
 
@@ -98,7 +101,7 @@ export const Cache =
           const result = await originalMethod.apply(this, args);
 
           if (Reflect.getMetadata(key, target) === INTERNAL_KIND.PERSISTENT) {
-            cacheEventEmitter.emit(`${INTERNAL_KIND.PERSISTENT}=>${key}`);
+            cacheEventEmitter.emit(`__${INTERNAL_KIND.PERSISTENT}=>${key}__`);
           }
 
           return result;

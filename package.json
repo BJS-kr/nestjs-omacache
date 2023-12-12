@@ -1,6 +1,6 @@
 {
   "name": "@teamsparta/cache",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "cache module for nestjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -2,11 +2,11 @@ import request from "supertest";
 import { describe, it, before, after } from "node:test";
 import { equal } from "node:assert/strict";
 import { Test } from "@nestjs/testing";
-import { TestController } from "./controller";
 import { TestService } from "./service";
 import { HttpServer, INestApplication } from "@nestjs/common";
 import { sleep } from "./util";
 import { CacheModule } from "../cache.module";
+import { TestController } from "./controller";
 
 const lessThan = (a: number, b: number) => equal(a < b, true);
 const biggerThan = (a: number, b: number) => equal(a > b, true);

@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
-import { TestService } from "./service";
 import { sleep, startTime } from "./util";
 import { InMemCache } from "./cache.decorator";
+import { TestService } from "./service";
 
 @Controller()
 export class TestController {

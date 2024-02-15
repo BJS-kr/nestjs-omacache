@@ -1,11 +1,11 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { sleep, startTime } from "./util";
-import { InMemCache } from "./cache.decorator";
-import { TestService } from "./service";
+import {InMemCache, RedisCache} from "./cache.decorator";
+import {InMemTestService, RedisTestService} from "./service";
 
 @Controller()
-export class TestController {
-  constructor(private readonly testService: TestService) {}
+export class InMemTestController {
+  constructor(private readonly testService: InMemTestService) {}
   @Get("test1")
   @InMemCache({
     key: "test1",
@@ -67,5 +67,73 @@ export class TestController {
     await this.testService.cacheableTask2();
 
     return "test4";
+  }
+}
+
+@Controller()
+export class RedisTestController {
+  constructor(private readonly testService: RedisTestService) {}
+
+  @Get("RedisTest1")
+  @RedisCache({
+    key: "RedisTest1",
+    kind: "persistent",
+  })
+  async RedisTest1() {
+    await sleep(1000);
+
+    return "RedisTest1";
+  }
+
+  @Get("RedisTest2")
+  @RedisCache({
+    key: "RedisTest2",
+    kind: "persistent",
+    refreshIntervalSec: 2,
+  })
+  async RedisTest2() {
+    await sleep(1000);
+
+    if (Date.now() - startTime > 3000) {
+      return "modified RedisTest2";
+    } else {
+      return "RedisTest2";
+    }
+  }
+
+  @Get("RedisTest2/bust")
+  @RedisCache({
+    key: "RedisTest2",
+    kind: "bust",
+  })
+  async RedisTest2bust() {}
+
+  @Get("RedisTest3/:param")
+  @RedisCache({
+    key: "RedisTest3",
+    kind: "temporal",
+    ttl: 3,
+    paramIndex: [0, 1],
+  })
+  async RedisTest3(@Param("param") param: string, @Query("query") query: string) {
+    await sleep(1000);
+
+    return "RedisTest3" + param + query;
+  }
+
+  @Get("RedisTest3/bust")
+  @RedisCache({
+    key: "RedisTest3",
+    kind: "bust",
+  })
+  async RedisTest3bust() {}
+
+  @Get("RedisTest4")
+  async partiallyCached() {
+    await this.testService.cacheableTask1();
+    await this.testService.notCacheableTask();
+    await this.testService.cacheableTask2();
+
+    return "RedisTest4";
   }
 }

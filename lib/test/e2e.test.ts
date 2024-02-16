@@ -137,4 +137,16 @@ describe("e2e test of cache decorator", () => {
     app.close();
     httpServer.close();
   });
+
+  it("should return immediately(set on start).test5 route(decorator order is reversed)", async () => {
+    await sleep(1000);
+
+    const start = Date.now();
+    const response = await request(httpServer).get("/test5");
+    const diff = Date.now() - start;
+
+    equal(response.status, 200);
+    equal(response.text, "test5");
+    lessThan(diff, 50);
+  });
 });

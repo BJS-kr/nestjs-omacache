@@ -2,6 +2,8 @@ import { Controller, Get, Param, Query } from "@nestjs/common";
 import { sleep, startTime } from "./util";
 import { InMemCache } from "./cache.decorator";
 import { TestService } from "./service";
+import {ModifyMethod} from "../test-decorator";
+import {METHOD_METADATA} from "@nestjs/common/constants";
 
 @Controller()
 export class TestController {
@@ -67,5 +69,16 @@ export class TestController {
     await this.testService.cacheableTask2();
 
     return "test4";
+  }
+
+  @InMemCache({
+    key: "test5",
+    kind: "persistent",
+  })
+  @Get("test5")
+  async reverseOrderDecorator() {
+    await sleep(1000);
+
+    return "test5";
   }
 }

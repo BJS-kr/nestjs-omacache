@@ -2,12 +2,12 @@ import request from "supertest";
 import { describe, it, before, after } from "node:test";
 import { equal } from "node:assert/strict";
 import { Test } from "@nestjs/testing";
-import {InMemTestService, RedisTestService} from "./service";
+import { InMemTestService, RedisTestService } from "./service";
 import { HttpServer, INestApplication } from "@nestjs/common";
 import { sleep } from "./util";
 import { CacheModule } from "../cache.module";
-import {InMemTestController, RedisTestController} from "./controller";
-import {createClient, RedisClientType} from "redis";
+import { InMemTestController, RedisTestController } from "./controller";
+import { createClient, RedisClientType } from "redis";
 
 const lessThan = (a: number, b: number) => equal(a < b, true);
 const biggerThan = (a: number, b: number) => equal(a > b, true);
@@ -19,7 +19,7 @@ describe("e2e test of cache decorator", () => {
   before(async () => {
     // start local redis server
 
-    client = createClient({ url: 'redis://localhost:6379' });
+    client = createClient({ url: "redis://localhost:6379" });
     await client.connect();
     await client.flushDb();
 
@@ -43,7 +43,7 @@ describe("e2e test of cache decorator", () => {
     httpServer.close();
   });
 
-  describe('InMemCache', () => {
+  describe("InMemCache", () => {
     it("should return immediately(set on start). test1 route", async () => {
       // give time to server execute and set cache...
       await sleep(1000);
@@ -95,7 +95,7 @@ describe("e2e test of cache decorator", () => {
     it("should return deferred value at first, then return cached value immediately", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-          "/test3/paramValue?query=queryValue"
+        "/test3/paramValue?query=queryValue"
       );
       const diff = Date.now() - start;
 
@@ -104,7 +104,7 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-          "/test3/paramValue?query=queryValue"
+        "/test3/paramValue?query=queryValue"
       );
       const diff2 = Date.now() - start2;
 
@@ -115,7 +115,7 @@ describe("e2e test of cache decorator", () => {
     it("should return both deferred value if referenced value is different(parameter combined cache)", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-          "/test3/param1?query=query1"
+        "/test3/param1?query=query1"
       );
       const diff = Date.now() - start;
 
@@ -124,7 +124,7 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-          "/test3/param2?query=query1"
+        "/test3/param2?query=query1"
       );
       const diff2 = Date.now() - start2;
 
@@ -148,9 +148,9 @@ describe("e2e test of cache decorator", () => {
       lessThan(diff2, 1100);
       equal(response2.text, "test4");
     });
-  })
+  });
 
-  describe(('RedisCache'), () => {
+  describe("RedisCache", () => {
     it("should return immediately(set on start). RedisTest1 route", async () => {
       // give time to server execute and set cache...
       await sleep(1000);
@@ -202,7 +202,7 @@ describe("e2e test of cache decorator", () => {
     it("should return deferred value at first, then return cached value immediately", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-          "/RedisTest3/paramValue?query=queryValue"
+        "/RedisTest3/paramValue?query=queryValue"
       );
       const diff = Date.now() - start;
 
@@ -211,7 +211,7 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-          "/RedisTest3/paramValue?query=queryValue"
+        "/RedisTest3/paramValue?query=queryValue"
       );
       const diff2 = Date.now() - start2;
 
@@ -222,7 +222,7 @@ describe("e2e test of cache decorator", () => {
     it("should return both deferred value if referenced value is different(parameter combined cache)", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-          "/RedisTest3/param1?query=query1"
+        "/RedisTest3/param1?query=query1"
       );
       const diff = Date.now() - start;
 
@@ -231,7 +231,7 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-          "/RedisTest3/param2?query=query1"
+        "/RedisTest3/param2?query=query1"
       );
       const diff2 = Date.now() - start2;
 
@@ -255,6 +255,17 @@ describe("e2e test of cache decorator", () => {
       lessThan(diff2, 1100);
       equal(response2.text, "RedisTest4");
     });
-  })
+  });
 
+  it("should return immediately(set on start).test5 route(decorator order is reversed)", async () => {
+    await sleep(1000);
+
+    const start = Date.now();
+    const response = await request(httpServer).get("/test5");
+    const diff = Date.now() - start;
+
+    equal(response.status, 200);
+    equal(response.text, "test5");
+    lessThan(diff, 50);
+  });
 });

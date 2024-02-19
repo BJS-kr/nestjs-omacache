@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { sleep, startTime } from "./util";
-import {InMemCache, RedisCache} from "./cache.decorator";
-import {InMemTestService, RedisTestService} from "./service";
+import { InMemCache, RedisCache } from "./cache.decorator";
+import { InMemTestService, RedisTestService } from "./service";
 
 @Controller()
 export class InMemTestController {
@@ -68,6 +68,17 @@ export class InMemTestController {
 
     return "test4";
   }
+
+  @InMemCache({
+    key: "test5",
+    kind: "persistent",
+  })
+  @Get("test5")
+  async reverseOrderDecorator() {
+    await sleep(1000);
+
+    return "test5";
+  }
 }
 
 @Controller()
@@ -115,7 +126,10 @@ export class RedisTestController {
     ttl: 3,
     paramIndex: [0, 1],
   })
-  async RedisTest3(@Param("param") param: string, @Query("query") query: string) {
+  async RedisTest3(
+    @Param("param") param: string,
+    @Query("query") query: string
+  ) {
     await sleep(1000);
 
     return "RedisTest3" + param + query;

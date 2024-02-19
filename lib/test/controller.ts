@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import {Body, Controller, Get, Param, Post, Query} from "@nestjs/common";
 import { sleep, startTime } from "./util";
 import { InMemCache, RedisCache } from "./cache.decorator";
 import { InMemTestService, RedisTestService } from "./service";
@@ -51,6 +51,19 @@ export class InMemTestController {
     await sleep(1000);
 
     return "test3" + param + query;
+  }
+
+  @Post("test3")
+  @InMemCache({
+      key: "test3",
+      kind: "temporal",
+      ttl: 3,
+      paramIndex: [0],
+  })
+  async test3post(@Body() body: {[key: string]: any}) {
+    await sleep(1000);
+
+    return "test3" + Object.keys(body).join("");
   }
 
   @Get("test3/bust")

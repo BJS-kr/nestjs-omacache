@@ -15,7 +15,7 @@ export const makeParamBasedCacheKey = (
 ) =>
   !paramIndex
     ? key
-    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${args[pidx]}`, key);
+    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx])).toString("base64")}`, key);
 
 function copyOriginalMetadataToCacheDescriptor(metadataKeys: any[], originalMethod: any, descriptor: PropertyDescriptor) {
   metadataKeys.forEach((key) => {

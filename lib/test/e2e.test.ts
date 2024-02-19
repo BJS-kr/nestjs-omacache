@@ -15,10 +15,25 @@ const biggerThan = (a: number, b: number) => equal(a > b, true);
 describe("e2e test of cache decorator", () => {
   let httpServer: HttpServer;
   let app: INestApplication;
+  let service: InMemTestService;
   let client: RedisClientType;
+  const requestBody = {
+    "stringValue": "Hello, world!",
+    "numberValue": 123,
+    "objectValue": {
+      "nestedString": "This is a string inside an object",
+      "nestedNumber": 456,
+      "nestedObject": {
+        "anotherKey": "Another string"
+      }
+    },
+    "arrayValue": ["string in array", 789, true, null, { "objectInArray": "value" }],
+    "booleanValue": true,
+    "nullValue": null
+  };
+
   before(async () => {
     // start local redis server
-
     client = createClient({ url: "redis://localhost:6379" });
     await client.connect();
     await client.flushDb();
@@ -34,6 +49,7 @@ describe("e2e test of cache decorator", () => {
 
     await app.init();
     httpServer = app.getHttpServer();
+    service = app.get<InMemTestService>(InMemTestService);
   });
 
   after(() => {
@@ -130,6 +146,55 @@ describe("e2e test of cache decorator", () => {
 
       biggerThan(diff2, 1000);
       equal(response2.text, "test3param2query1");
+    });
+
+    it("should work with object parameters", async () => {
+      const start = Date.now();
+      const response = await request(httpServer).post("/test3").send(requestBody);
+      const diff = Date.now() - start;
+
+      biggerThan(diff, 1000);
+      equal(response.text, "test3" + Object.keys(requestBody).join(""));
+
+      const start2 = Date.now();
+      const response2 = await request(httpServer).post("/test3").send(requestBody);
+      const diff2 = Date.now() - start2;
+
+      lessThan(diff2, 50);
+      equal(response2.text, "test3" + Object.keys(requestBody).join(""));
+
+      const start3 = Date.now();
+      const modifiedRequestBody = {...requestBody, "stringValue": "modified"};
+      const response3 = await request(httpServer).post("/test3").send(modifiedRequestBody);
+      const diff3 = Date.now() - start3;
+
+      biggerThan(diff3, 1000);
+      equal(response3.text, "test3" + Object.keys(modifiedRequestBody).join(""));
+    });
+
+    it("should work with array parameters", async () => {
+      const array = [1, 'hi', true, {a: 1}, [1, 2], null];
+      const start = Date.now();
+      const result = await service.cacheableTaskwithArrayParam(array);
+      const diff = Date.now() - start;
+
+      biggerThan(diff, 1000);
+      equal(result, array.join(""));
+
+      const start2 = Date.now();
+      const result2 = await service.cacheableTaskwithArrayParam(array);
+      const diff2 = Date.now() - start2;
+
+      lessThan(diff2, 50);
+      equal(result2, array.join(""));
+
+      const start3 = Date.now();
+      const modifiedArray = [...array, 2];
+      const result3 = await service.cacheableTaskwithArrayParam(modifiedArray);
+      const diff3 = Date.now() - start3;
+
+      biggerThan(diff3, 1000);
+      equal(result3, modifiedArray.join(""));
     });
 
     it("should cache injectable partially so whole Request-Response cycle can divided into optimizable sections", async () => {

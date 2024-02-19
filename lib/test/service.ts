@@ -28,4 +28,15 @@ export class TestService {
     await sleep(1000);
     return true;
   }
+
+  @InMemCache({
+    key: "test3",
+    kind: "temporal",
+    ttl: 3,
+    paramIndex: [0],
+  })
+  async cacheableTaskwithArrayParam(param: any[]) {
+    await sleep(1000);
+    return param.join("");
+  }
 }

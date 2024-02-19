@@ -14,6 +14,21 @@ const biggerThan = (a: number, b: number) => equal(a > b, true);
 describe("e2e test of cache decorator", () => {
   let httpServer: HttpServer;
   let app: INestApplication;
+  const requestBody = {
+    "stringValue": "Hello, world!",
+    "numberValue": 123,
+    "objectValue": {
+      "nestedString": "This is a string inside an object",
+      "nestedNumber": 456,
+      "nestedObject": {
+        "anotherKey": "Another string"
+      }
+    },
+    "arrayValue": ["string in array", 789, true, null, { "objectInArray": "value" }],
+    "booleanValue": true,
+    "nullValue": null
+  };
+
   before(async () => {
     // start server
     const moduleRef = await Test.createTestingModule({
@@ -99,7 +114,7 @@ describe("e2e test of cache decorator", () => {
   it("should return both deferred value if referenced value is different(parameter combined cache)", async () => {
     const start = Date.now();
     const response = await request(httpServer).get(
-      "/test3/param1?query=query1"
+        "/test3/param1?query=query1"
     );
     const diff = Date.now() - start;
 
@@ -108,12 +123,28 @@ describe("e2e test of cache decorator", () => {
 
     const start2 = Date.now();
     const response2 = await request(httpServer).get(
-      "/test3/param2?query=query1"
+        "/test3/param2?query=query1"
     );
     const diff2 = Date.now() - start2;
 
     biggerThan(diff2, 1000);
     equal(response2.text, "test3param2query1");
+  });
+
+  it("should work with object parameters", async () => {
+    const start = Date.now();
+    const response = await request(httpServer).post("/test3").send(requestBody);
+    const diff = Date.now() - start;
+
+    biggerThan(diff, 1000);
+    equal(response.text, "test3" + Object.keys(requestBody).join(""));
+
+    const start2 = Date.now();
+    const response2 = await request(httpServer).post("/test3").send(requestBody);
+    const diff2 = Date.now() - start2;
+
+    lessThan(diff2, 50);
+    equal(response2.text, "test3" + Object.keys(requestBody).join(""));
   });
 
   it("should cache injectable partially so whole Request-Response cycle can divided into optimizable sections", async () => {

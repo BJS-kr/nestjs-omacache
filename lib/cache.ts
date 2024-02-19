@@ -17,6 +17,13 @@ export const makeParamBasedCacheKey = (
     ? key
     : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx])).toString("base64")}`, key);
 
+function copyOriginalMetadataToCacheDescriptor(metadataKeys: any[], originalMethod: any, descriptor: PropertyDescriptor) {
+  metadataKeys.forEach((key) => {
+    const metadataValue = Reflect.getMetadata(key, originalMethod);
+    Reflect.defineMetadata(key, metadataValue, descriptor.value);
+  });
+}
+
 export const Cache =
   ({ storage }: { storage: ICacheStorage }) =>
   <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
@@ -26,6 +33,7 @@ export const Cache =
       descriptor: PropertyDescriptor
     ) => {
       const originalMethod = descriptor.value;
+      const originalMethodMetadataKeys = Reflect.getMetadataKeys(originalMethod);
       const { key } = cacheOptions;
 
       if (isPersistent(cacheOptions)) {
@@ -42,7 +50,7 @@ export const Cache =
           const result = await originalMethod.call(this);
           storage.set(key, result);
 
-          if (refreshIntervalSec && !(await intervalTimerMap.has(key))) {
+          if (refreshIntervalSec && !(intervalTimerMap.has(key))) {
             setInterval(() => {
               const result = originalMethod.call(this);
 
@@ -107,9 +115,13 @@ export const Cache =
           return result;
         };
       }
+      copyOriginalMetadataToCacheDescriptor(originalMethodMetadataKeys, originalMethod, descriptor);
 
       SetMetadata(CACHE, cacheOptions)(descriptor.value);
 
       return descriptor;
     };
   };
+
+
+

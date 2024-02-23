@@ -1,10 +1,10 @@
 {
   "name": "@teamsparta/cache",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "cache module for nestjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/TeamSparta-Inc/nestjs-cache.git",
+  "repository": "https://github.com/BJS-kr/nestjs-omacache.git",
   "directories": {
     "lib": "lib"
   },

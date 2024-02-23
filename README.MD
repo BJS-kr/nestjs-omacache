@@ -1,13 +1,8 @@
-# Cache Decorator Factory for NestJS
+# NestJS-Omacache
 
-## Migrate to >= 1.1!
-
-There was a bug that timer keep stacked in the event loop below version 1.1!  
-please migrate to 1.1 or above
-
-## Contact
-
-js.byeon@teamsparta.co
+<p align="center">
+<img src="https://github.com/TeamSparta-Inc/nestjs-cache/assets/119388148/c686a2a8-a785-4dba-8a5c-6bce1dd68b45" alt="omacache_logo" width="200" class="center"/>
+</p>
 
 ## Motivation
 

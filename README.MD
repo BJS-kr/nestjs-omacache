@@ -26,7 +26,7 @@ Cache option type automatically switched by 'kind' option(persistent or temporal
 
 ```typescript
 // root module
-import { CacheModule } from '@teamsparta/cache'
+import { CacheModule } from 'nestjs-omacache'
 
 @Module({
     // this import enables set-on-start caching

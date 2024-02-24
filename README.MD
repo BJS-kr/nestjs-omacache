@@ -64,7 +64,7 @@ const InMemoryCache = Cache({ storage: new Map() satisfies ICacheStorage });
 ### Use it anywhere
 
 ```typescript
-// regardless class is Controller or Injectable, you can use InMemoryCache decorator
+// regardless class is Controller or Injectable, you can use produced cache decorator
 @Controller()
 class AppController {
     @Get()

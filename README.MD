@@ -41,7 +41,7 @@ export class AppModule {}
 ```typescript
 // imported 'Cache' is factory to receive storage that implements ICacheStorage
 // in this example, we'll initialize in-memory cache
-import { Cache, ICacheStorage } from "@teamsparta/cache";
+import { Cache, ICacheStorage } from "nestjs-omacache";
 
 // for example, we can use redis for storage
 // What ever your implementation is, it must satisfies ICacheStorage interface.

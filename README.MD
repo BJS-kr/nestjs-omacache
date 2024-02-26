@@ -26,7 +26,7 @@ Cache option type automatically switched by 'kind' option(persistent or temporal
 
 ```typescript
 // root module
-import { CacheModule } from '@teamsparta/cache'
+import { CacheModule } from 'nestjs-omacache'
 
 @Module({
     // this import enables set-on-start caching
@@ -41,7 +41,7 @@ export class AppModule {}
 ```typescript
 // imported 'Cache' is factory to receive storage that implements ICacheStorage
 // in this example, we'll initialize in-memory cache
-import { Cache, ICacheStorage } from "@teamsparta/cache";
+import { Cache, ICacheStorage } from "nestjs-omacache";
 
 // for example, we can use redis for storage
 // What ever your implementation is, it must satisfies ICacheStorage interface.
@@ -64,7 +64,7 @@ const InMemoryCache = Cache({ storage: new Map() satisfies ICacheStorage });
 ### Use it anywhere
 
 ```typescript
-// regardless class is Controller or Injectable, you can use InMemoryCache decorator
+// regardless class is Controller or Injectable, you can use produced cache decorator
 @Controller()
 class AppController {
     @Get()

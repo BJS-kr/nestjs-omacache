@@ -40,14 +40,26 @@ export class InMemTestController {
   })
   async test2bust() {}
 
-  @Get("test3/:param")
+  @Get("test3/noParam")
+  @InMemCache({
+    key: "test3",
+    kind: "temporal",
+    ttl: 3,
+  })
+  async test3() {
+    await sleep(1000);
+
+    return "test3";
+  }
+
+  @Get("test3/withParam/:param")
   @InMemCache({
     key: "test3",
     kind: "temporal",
     ttl: 3,
     paramIndex: [0, 1],
   })
-  async test3(@Param("param") param: string, @Query("query") query: string) {
+  async test3param(@Param("param") param: string, @Query("query") query: string) {
     await sleep(1000);
 
     return "test3" + param + query;
@@ -72,6 +84,14 @@ export class InMemTestController {
     kind: "bust",
   })
   async test3bust() {}
+
+  @Get("test3/rootKeyBust")
+  @InMemCache({
+    key: "test3",
+    kind: "bust",
+    isRootKey: true,
+  })
+  async test3RootKeyBust() {}
 
   @Get("test4")
   async partiallyCached() {

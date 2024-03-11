@@ -35,7 +35,7 @@ export class InMemTestService {
     ttl: 3,
     paramIndex: [0],
   })
-  async cacheableTaskwithArrayParam(param: any[]) {
+  async cacheableTaskWithArrayParam(param: any[]) {
     await sleep(1000);
     return param.join("");
   }

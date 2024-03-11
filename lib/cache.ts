@@ -16,7 +16,7 @@ export const makeParamBasedCacheKey = (
 ) =>
   !paramIndex
     ? key
-    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx])).toString("base64")}`, key);
+    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx]))}`, key);
 
 const mapCacheKeyToRootKey = (cacheKey: string, rootKey: string) => {
   if (!rootKeyMap.has(rootKey)) rootKeyMap.set(rootKey, new Set<string>());

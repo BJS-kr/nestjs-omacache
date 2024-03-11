@@ -217,36 +217,36 @@ class SomeController {
         ...
     }
     
-    // if you want to unset all cache with specific 'key', you can use isRootKey option.
+    // if you want to unset all cache based on a key, you can use bustAllParams option.
     // this will only work for temporal cache.
-    @Get('/all')
+    @Get('/foo')
     @ExternalCache({
-        key: 'all',
+        key: 'foo',
         kind: 'temporal',
         ttl: 30,
     })
-    getAll() {
+    getFoo() {
         ...
     }
     
-    @Get('all/:p1/:p2')
+    @Get('foo/:p1/:p2')
     @ExternalCache({
-        key: 'all',
+        key: 'foo',
         kind: 'temporal',
         ttl: 30,
         paramIndex: [0, 1]
     })
-    getAllOther(@Param('p1') p1: string, @Param('p2') p2: string) {
+    getFooOther(@Param('p1') p1: string, @Param('p2') p2: string) {
         ...
     }
     
-    @Patch('/all')
+    @Patch('/foo')
     @ExternalCache({
-        key: 'all',
+        key: 'foo',
         kind: 'bust',
-        isRootKey: true
+        bustAllParams: true
     })
-    updateAll() {
+    updateFoo() {
         ...
     }
 }

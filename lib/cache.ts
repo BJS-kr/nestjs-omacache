@@ -7,6 +7,7 @@ import "reflect-metadata";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
+const rootKeyMap = new Map<string, Set<string>>();
 
 export const makeParamBasedCacheKey = (
   key: string,
@@ -16,6 +17,11 @@ export const makeParamBasedCacheKey = (
   !paramIndex
     ? key
     : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx])).toString("base64")}`, key);
+
+const mapCacheKeyToRootKey = (cacheKey: string, rootKey: string) => {
+  if (!rootKeyMap.has(rootKey)) rootKeyMap.set(rootKey, new Set<string>());
+  rootKeyMap.get(rootKey).add(cacheKey);
+}
 
 function copyOriginalMetadataToCacheDescriptor(metadataKeys: any[], originalMethod: any, descriptor: PropertyDescriptor) {
   metadataKeys.forEach((key) => {
@@ -86,6 +92,7 @@ export const Cache =
 
         descriptor.value = async function (...args: any[]) {
           const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+          mapCacheKeyToRootKey(cacheKey, key);
 
           if (await storage.has(cacheKey)) return storage.get(cacheKey);
 
@@ -101,10 +108,18 @@ export const Cache =
 
       if (isBust(cacheOptions)) {
         descriptor.value = async function (...args: any[]) {
-          const { paramIndex } = cacheOptions;
-          const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+          const { paramIndex, isRootKey } = cacheOptions;
 
-          await storage.delete(cacheKey);
+          if (isRootKey && rootKeyMap.has(key)) {
+            // persistent cache 이고 isRootKey 가 true 인 bust 요청일 경우 아무것도 삭제되지 않음.
+            // persistent cache 는 rootKeyMap 에 저장되지 않으므로.
+            rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
+            rootKeyMap.delete(key);
+          } else {
+            const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+            await storage.delete(cacheKey);
+            rootKeyMap.get(key)?.delete(cacheKey);
+          }
 
           const result = await originalMethod.apply(this, args);
 

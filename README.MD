@@ -216,6 +216,39 @@ class SomeController {
     updateSomeOther(@Param('p1') p1: string, @Param('p2') p2: string) {
         ...
     }
+    
+    // if you want to unset all cache with specific 'key', you can use isRootKey option.
+    // this will only work for temporal cache.
+    @Get('/all')
+    @ExternalCache({
+        key: 'all',
+        kind: 'temporal',
+        ttl: 30,
+    })
+    getAll() {
+        ...
+    }
+    
+    @Get('all/:p1/:p2')
+    @ExternalCache({
+        key: 'all',
+        kind: 'temporal',
+        ttl: 30,
+        paramIndex: [0, 1]
+    })
+    getAllOther(@Param('p1') p1: string, @Param('p2') p2: string) {
+        ...
+    }
+    
+    @Patch('/all')
+    @ExternalCache({
+        key: 'all',
+        kind: 'bust',
+        isRootKey: true
+    })
+    updateAll() {
+        ...
+    }
 }
 
 ```

@@ -111,11 +111,11 @@ export const Cache =
 
       if (isBust(cacheOptions)) {
         descriptor.value = async function (...args: any[]) {
-          const { paramIndex, isRootKey } = cacheOptions;
+          const { paramIndex, bustAllParams } = cacheOptions;
 
-          if (isRootKey && rootKeyMap.has(key)) {
-            // persistent cache 이고 isRootKey 가 true 인 bust 요청일 경우 아무것도 삭제되지 않음.
-            // persistent cache 는 rootKeyMap 에 저장되지 않으므로.
+          if (bustAllParams && rootKeyMap.has(key)) {
+            // if the target of bust call is persistent cache, but bustAllParams option is true,
+            // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
             rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
             rootKeyMap.delete(key);
           } else {

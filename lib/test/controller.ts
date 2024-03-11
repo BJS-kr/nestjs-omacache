@@ -89,7 +89,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "bust",
-    isRootKey: true,
+    bustAllParams: true,
   })
   async test3RootKeyBust() {}
 

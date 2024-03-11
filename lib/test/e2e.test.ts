@@ -147,7 +147,8 @@ describe("e2e test of cache decorator", () => {
       biggerThan(diff2, 1000);
       equal(response2.text, "test3param2query1");
     });
-    it("should bust all cache if isRootKey is true", async () => {
+
+    it("should bust all param based cache with a key if bustAllParams is true", async () => {
       /* first request */
       // no param
       const start = Date.now();
@@ -286,7 +287,7 @@ describe("e2e test of cache decorator", () => {
       equal(result2, array.join(""));
 
       const start3 = Date.now();
-      const modifiedArray = [...array, 2];
+      const modifiedArray = [...array, "modified"];
       const result3 = await service.cacheableTaskWithArrayParam(modifiedArray);
       const diff3 = Date.now() - start3;
 

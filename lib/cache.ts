@@ -100,7 +100,10 @@ export const Cache =
 
           storage.set(cacheKey, result);
 
-          setTimeout(() => storage.delete(cacheKey), ttl * 1000);
+          setTimeout(() => {
+            storage.delete(cacheKey);
+            rootKeyMap.get(key)?.delete(cacheKey);
+          }, ttl * 1000);
 
           return result;
         };

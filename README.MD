@@ -147,7 +147,7 @@ class SomeController {
 
 ```typescript
 // we need to set same key to set & unset cache
-// keep in mind that cache control by key is supported for temporal cache only
+// keep in mind that cache control by parameters is supported for temporal cache only
 @Controller()
 class SomeController {
     @Get()
@@ -214,6 +214,39 @@ class SomeController {
         paramIndex: [0, 1]
     })
     updateSomeOther(@Param('p1') p1: string, @Param('p2') p2: string) {
+        ...
+    }
+    
+    // if you want to unset all cache based on a key, you can use bustAllChildren option.
+    // this will only work for temporal cache.
+    @Get('/foo')
+    @ExternalCache({
+        key: 'foo',
+        kind: 'temporal',
+        ttl: 30,
+    })
+    getFoo() {
+        ...
+    }
+    
+    @Get('foo/:p1/:p2')
+    @ExternalCache({
+        key: 'foo',
+        kind: 'temporal',
+        ttl: 30,
+        paramIndex: [0, 1]
+    })
+    getFooOther(@Param('p1') p1: string, @Param('p2') p2: string) {
+        ...
+    }
+    
+    @Patch('/foo')
+    @ExternalCache({
+        key: 'foo',
+        kind: 'bust',
+        bustAllChildren: true
+    })
+    updateFoo() {
         ...
     }
 }

@@ -7,6 +7,7 @@ import "reflect-metadata";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
+const rootKeyMap = new Map<string, Set<string>>();
 
 export const makeParamBasedCacheKey = (
   key: string,
@@ -15,7 +16,12 @@ export const makeParamBasedCacheKey = (
 ) =>
   !paramIndex
     ? key
-    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx])).toString("base64")}`, key);
+    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx]))}`, key);
+
+const mapCacheKeyToRootKey = (cacheKey: string, rootKey: string) => {
+  if (!rootKeyMap.has(rootKey)) rootKeyMap.set(rootKey, new Set<string>());
+  rootKeyMap.get(rootKey).add(cacheKey);
+}
 
 function copyOriginalMetadataToCacheDescriptor(metadataKeys: any[], originalMethod: any, descriptor: PropertyDescriptor) {
   metadataKeys.forEach((key) => {
@@ -86,6 +92,7 @@ export const Cache =
 
         descriptor.value = async function (...args: any[]) {
           const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+          mapCacheKeyToRootKey(cacheKey, key);
 
           if (await storage.has(cacheKey)) return storage.get(cacheKey);
 
@@ -93,7 +100,10 @@ export const Cache =
 
           storage.set(cacheKey, result);
 
-          setTimeout(() => storage.delete(cacheKey), ttl * 1000);
+          setTimeout(() => {
+            storage.delete(cacheKey);
+            rootKeyMap.get(key)?.delete(cacheKey);
+          }, ttl * 1000);
 
           return result;
         };
@@ -101,10 +111,18 @@ export const Cache =
 
       if (isBust(cacheOptions)) {
         descriptor.value = async function (...args: any[]) {
-          const { paramIndex } = cacheOptions;
-          const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+          const { paramIndex, bustAllChildren } = cacheOptions;
 
-          await storage.delete(cacheKey);
+          if (bustAllChildren && rootKeyMap.has(key)) {
+            // if the target of bust call is persistent cache, but bustAllChildren option is true,
+            // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
+            rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
+            rootKeyMap.delete(key);
+          } else {
+            const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+            await storage.delete(cacheKey);
+            rootKeyMap.get(key)?.delete(cacheKey);
+          }
 
           const result = await originalMethod.apply(this, args);
 

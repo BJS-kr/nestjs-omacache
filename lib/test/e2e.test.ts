@@ -111,7 +111,7 @@ describe("e2e test of cache decorator", () => {
     it("should return deferred value at first, then return cached value immediately", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-        "/test3/paramValue?query=queryValue"
+          "/test3/withParam/paramValue?query=queryValue"
       );
       const diff = Date.now() - start;
 
@@ -120,7 +120,7 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-        "/test3/paramValue?query=queryValue"
+          "/test3/withParam/paramValue?query=queryValue"
       );
       const diff2 = Date.now() - start2;
 
@@ -131,7 +131,7 @@ describe("e2e test of cache decorator", () => {
     it("should return both deferred value if referenced value is different(parameter combined cache)", async () => {
       const start = Date.now();
       const response = await request(httpServer).get(
-        "/test3/param1?query=query1"
+          "/test3/withParam/param1?query=query1"
       );
       const diff = Date.now() - start;
 
@@ -140,12 +140,110 @@ describe("e2e test of cache decorator", () => {
 
       const start2 = Date.now();
       const response2 = await request(httpServer).get(
-        "/test3/param2?query=query1"
+          "/test3/withParam/param2?query=query1"
       );
       const diff2 = Date.now() - start2;
 
       biggerThan(diff2, 1000);
       equal(response2.text, "test3param2query1");
+    });
+
+    it("should bust all param based cache with a key if bustAllChildren is true", async () => {
+      /* first request */
+      // no param
+      const start = Date.now();
+      const response = await request(httpServer).get(
+          "/test3/noParam"
+      );
+      const diff = Date.now() - start;
+
+      biggerThan(diff, 1000);
+      equal(response.text, "test3");
+
+      // p1, q1
+      const start1 = Date.now();
+      const response1 = await request(httpServer).get(
+          "/test3/withParam/_p1?query=_q1"
+      );
+      const diff1 = Date.now() - start1;
+
+      biggerThan(diff1, 1000);
+      equal(response1.text, "test3_p1_q1");
+
+      // p2, q1
+      const start2 = Date.now();
+      const response2 = await request(httpServer).get(
+          "/test3/withParam/_p2?query=_q1"
+      );
+      const diff2 = Date.now() - start2;
+
+      biggerThan(diff2, 1000);
+      equal(response2.text, "test3_p2_q1");
+
+      /* second request */
+      // no param
+      const start3 = Date.now();
+      const response3 = await request(httpServer).get(
+          "/test3/noParam"
+      );
+      const diff3 = Date.now() - start3;
+
+      lessThan(diff3, 50);
+      equal(response3.text, "test3");
+
+      // p1, q1
+      const start4 = Date.now();
+      const response4 = await request(httpServer).get(
+          "/test3/withParam/_p1?query=_q1"
+      );
+      const diff4 = Date.now() - start4;
+
+      lessThan(diff4, 50);
+      equal(response4.text, "test3_p1_q1");
+
+      // p2, q1
+      const start5 = Date.now();
+      const response5 = await request(httpServer).get(
+          "/test3/withParam/_p2?query=_q1"
+      );
+      const diff5 = Date.now() - start5;
+
+      lessThan(diff5, 50);
+      equal(response5.text, "test3_p2_q1");
+
+      /* bust all cache */
+      await request(httpServer).get("/test3/rootKeyBust");
+
+      /* third request */
+      // no param
+      const start6 = Date.now();
+      const response6 = await request(httpServer).get(
+          "/test3/noParam"
+      );
+      const diff6 = Date.now() - start6;
+
+      biggerThan(diff6, 1000);
+      equal(response6.text, "test3");
+
+      // p1, q1
+      const start7 = Date.now();
+      const response7 = await request(httpServer).get(
+          "/test3/withParam/_p1?query=_q1"
+      );
+      const diff7 = Date.now() - start7;
+
+      biggerThan(diff7, 1000);
+      equal(response7.text, "test3_p1_q1");
+
+      // p2, q1
+      const start8 = Date.now();
+      const response8 = await request(httpServer).get(
+          "/test3/withParam/_p2?query=_q1"
+      );
+      const diff8 = Date.now() - start8;
+
+      biggerThan(diff8, 1000);
+      equal(response8.text, "test3_p2_q1");
     });
 
     it("should work with object parameters", async () => {
@@ -175,22 +273,22 @@ describe("e2e test of cache decorator", () => {
     it("should work with array parameters", async () => {
       const array = [1, 'hi', true, {a: 1}, [1, 2], null];
       const start = Date.now();
-      const result = await service.cacheableTaskwithArrayParam(array);
+      const result = await service.cacheableTaskWithArrayParam(array);
       const diff = Date.now() - start;
 
       biggerThan(diff, 1000);
       equal(result, array.join(""));
 
       const start2 = Date.now();
-      const result2 = await service.cacheableTaskwithArrayParam(array);
+      const result2 = await service.cacheableTaskWithArrayParam(array);
       const diff2 = Date.now() - start2;
 
       lessThan(diff2, 50);
       equal(result2, array.join(""));
 
       const start3 = Date.now();
-      const modifiedArray = [...array, 2];
-      const result3 = await service.cacheableTaskwithArrayParam(modifiedArray);
+      const modifiedArray = [...array, "modified"];
+      const result3 = await service.cacheableTaskWithArrayParam(modifiedArray);
       const diff3 = Date.now() - start3;
 
       biggerThan(diff3, 1000);

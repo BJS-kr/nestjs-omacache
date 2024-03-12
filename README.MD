@@ -217,7 +217,7 @@ class SomeController {
         ...
     }
     
-    // if you want to unset all cache based on a key, you can use bustAllParams option.
+    // if you want to unset all cache based on a key, you can use bustAllChildren option.
     // this will only work for temporal cache.
     @Get('/foo')
     @ExternalCache({
@@ -244,7 +244,7 @@ class SomeController {
     @ExternalCache({
         key: 'foo',
         kind: 'bust',
-        bustAllParams: true
+        bustAllChildren: true
     })
     updateFoo() {
         ...

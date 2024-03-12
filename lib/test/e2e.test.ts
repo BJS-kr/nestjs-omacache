@@ -148,7 +148,7 @@ describe("e2e test of cache decorator", () => {
       equal(response2.text, "test3param2query1");
     });
 
-    it("should bust all param based cache with a key if bustAllParams is true", async () => {
+    it("should bust all param based cache with a key if bustAllChildren is true", async () => {
       /* first request */
       // no param
       const start = Date.now();

@@ -3,7 +3,7 @@ type CacheOptionSchema = {
   persistent: {
     refreshIntervalSec?: number;
   };
-  bust: { paramIndex?: number[], bustAllParams?: boolean };
+  bust: { paramIndex?: number[], bustAllChildren?: boolean };
 };
 export const enum INTERNAL_KIND {
   PERSISTENT = 0,

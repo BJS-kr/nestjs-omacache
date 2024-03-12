@@ -111,10 +111,10 @@ export const Cache =
 
       if (isBust(cacheOptions)) {
         descriptor.value = async function (...args: any[]) {
-          const { paramIndex, bustAllParams } = cacheOptions;
+          const { paramIndex, bustAllChildren } = cacheOptions;
 
-          if (bustAllParams && rootKeyMap.has(key)) {
-            // if the target of bust call is persistent cache, but bustAllParams option is true,
+          if (bustAllChildren && rootKeyMap.has(key)) {
+            // if the target of bust call is persistent cache, but bustAllChildren option is true,
             // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
             rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
             rootKeyMap.delete(key);

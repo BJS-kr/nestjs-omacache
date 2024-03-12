@@ -147,7 +147,7 @@ class SomeController {
 
 ```typescript
 // we need to set same key to set & unset cache
-// keep in mind that cache control by key is supported for temporal cache only
+// keep in mind that cache control by parameters is supported for temporal cache only
 @Controller()
 class SomeController {
     @Get()

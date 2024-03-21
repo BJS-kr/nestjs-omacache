@@ -116,16 +116,17 @@ export const Cache =
             if (bustAllChildren && rootKeyMap.has(key)) {
               // if the target of bust call is persistent cache, but bustAllChildren option is true,
               // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
+              rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
               rootKeyMap.delete(key);
             } else {
               const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
               await storage.delete(cacheKey);
               rootKeyMap.get(key)?.delete(cacheKey);
             }
-
             if (addition) {
               for (const additionalBusting of addition) {
                 if (additionalBusting.bustAllChildren && rootKeyMap.has(additionalBusting.key)) {
+                  rootKeyMap.get(additionalBusting.key).forEach((cacheKey) => storage.delete(cacheKey));
                   rootKeyMap.delete(additionalBusting.key);
                 } else {
                   const cacheKey = makeParamBasedCacheKey(additionalBusting.key, args, additionalBusting.paramIndex);

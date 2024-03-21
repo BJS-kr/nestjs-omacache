@@ -1,8 +1,8 @@
 import { Cache } from "../cache";
 import { createClient } from "redis";
-import {ICacheStorage} from "../types";
+import { ICacheStorage } from "../types";
 
-export const InMemCache = Cache({ storage: new Map() });
+export const InMemCache = Cache({ storage: new Map() satisfies ICacheStorage });
 
 export class RedisCacheStorage implements ICacheStorage {
     private client

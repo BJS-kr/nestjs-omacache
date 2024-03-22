@@ -1,11 +1,11 @@
-import {Body, Controller, Get, Param, Post, Query} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { sleep, startTime } from "./util";
 import { InMemCache, RedisCache } from "./cache.decorator";
 import { InMemTestService, RedisTestService } from "./service";
 
 @Controller()
 export class InMemTestController {
-  constructor(private readonly testService: InMemTestService) {}
+  constructor(private readonly testService: InMemTestService) { }
   @Get("test1")
   @InMemCache({
     key: "test1",
@@ -38,7 +38,7 @@ export class InMemTestController {
     key: "test2",
     kind: "bust",
   })
-  async test2bust() {}
+  async test2bust() { }
 
   @Get("test3/noParam")
   @InMemCache({
@@ -67,12 +67,12 @@ export class InMemTestController {
 
   @Post("test3")
   @InMemCache({
-      key: "test3",
-      kind: "temporal",
-      ttl: 3,
-      paramIndex: [0],
+    key: "test3",
+    kind: "temporal",
+    ttl: 3,
+    paramIndex: [0],
   })
-  async test3post(@Body() body: {[key: string]: any}) {
+  async test3post(@Body() body: { [key: string]: any }) {
     await sleep(1000);
 
     return "test3" + Object.keys(body).join("");
@@ -83,7 +83,7 @@ export class InMemTestController {
     key: "test3",
     kind: "bust",
   })
-  async test3bust() {}
+  async test3bust() { }
 
   @Get("test3/rootKeyBust")
   @InMemCache({
@@ -91,7 +91,7 @@ export class InMemTestController {
     kind: "bust",
     bustAllChildren: true,
   })
-  async test3RootKeyBust() {}
+  async test3RootKeyBust() { }
 
   @Get("test4")
   async partiallyCached() {
@@ -112,11 +112,47 @@ export class InMemTestController {
 
     return "test5";
   }
+
+  @InMemCache({
+    key: "test6",
+    kind: "temporal",
+    ttl: 10,
+  })
+  @Get("test6")
+  async test6() {
+    await sleep(1000);
+
+    return "test6";
+  }
+
+  @InMemCache({
+    key: "under_test6",
+    kind: "temporal",
+    ttl: 10,
+  })
+  @Get("under_test6")
+  async underTest6() {
+    await sleep(1000);
+
+    return "under_test6";
+  }
+
+  @Patch("test6/bust")
+  @InMemCache({
+    key: "test6",
+    kind: "bust",
+    addition: [
+      {
+        key: "under_test6",
+      }
+    ]
+  })
+  async test6bust() { }
 }
 
 @Controller()
 export class RedisTestController {
-  constructor(private readonly testService: RedisTestService) {}
+  constructor(private readonly testService: RedisTestService) { }
 
   @Get("RedisTest1")
   @RedisCache({
@@ -150,7 +186,7 @@ export class RedisTestController {
     key: "RedisTest2",
     kind: "bust",
   })
-  async RedisTest2bust() {}
+  async RedisTest2bust() { }
 
   @Get("RedisTest3/:param")
   @RedisCache({
@@ -173,7 +209,7 @@ export class RedisTestController {
     key: "RedisTest3",
     kind: "bust",
   })
-  async RedisTest3bust() {}
+  async RedisTest3bust() { }
 
   @Get("RedisTest4")
   async partiallyCached() {

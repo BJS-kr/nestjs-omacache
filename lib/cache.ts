@@ -16,7 +16,7 @@ export const makeParamBasedCacheKey = (
 ) =>
   !paramIndex
     ? key
-    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${Buffer.from(JSON.stringify(args[pidx]))}`, key);
+    : paramIndex.reduce((cacheKey, pidx) => `${cacheKey}:${JSON.stringify(args[pidx])}`, key);
 
 const mapCacheKeyToRootKey = (cacheKey: string, rootKey: string) => {
   if (!rootKeyMap.has(rootKey)) rootKeyMap.set(rootKey, new Set<string>());
@@ -32,114 +32,126 @@ function copyOriginalMetadataToCacheDescriptor(metadataKeys: any[], originalMeth
 
 export const Cache =
   ({ storage }: { storage: ICacheStorage }) =>
-  <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
-    return (
-      target: any,
-      _propertyKey: string,
-      descriptor: PropertyDescriptor
-    ) => {
-      const originalMethod = descriptor.value;
-      const originalMethodMetadataKeys = Reflect.getMetadataKeys(originalMethod);
-      const { key } = cacheOptions;
+    <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
+      return (
+        target: any,
+        _propertyKey: string,
+        descriptor: PropertyDescriptor
+      ) => {
+        const originalMethod = descriptor.value;
+        const originalMethodMetadataKeys = Reflect.getMetadataKeys(originalMethod);
+        const { key } = cacheOptions;
 
-      if (isPersistent(cacheOptions)) {
-        const { refreshIntervalSec } = cacheOptions;
+        if (isPersistent(cacheOptions)) {
+          const { refreshIntervalSec } = cacheOptions;
 
-        Reflect.defineMetadata(key, INTERNAL_KIND.PERSISTENT, target);
+          Reflect.defineMetadata(key, INTERNAL_KIND.PERSISTENT, target);
 
-        descriptor.value = async function () {
-          if (arguments.length)
-            throw new Error("arguments are not supported for persistent cache");
+          descriptor.value = async function () {
+            if (arguments.length)
+              throw new Error("arguments are not supported for persistent cache");
 
-          if (await storage.has(key)) return storage.get(key);
+            if (await storage.has(key)) return storage.get(key);
 
-          const result = await originalMethod.call(this);
-          storage.set(key, result);
+            const result = await originalMethod.call(this);
+            storage.set(key, result);
 
-          if (refreshIntervalSec && !(intervalTimerMap.has(key))) {
-            setInterval(() => {
-              const result = originalMethod.call(this);
+            if (refreshIntervalSec && !(intervalTimerMap.has(key))) {
+              setInterval(() => {
+                const result = originalMethod.call(this);
 
-              result instanceof Promise
-                ? result.then((result) => {
+                result instanceof Promise
+                  ? result.then((result) => {
                     storage.set(key, result);
                   })
-                : storage.set(key, result);
-            }, refreshIntervalSec * 1000);
+                  : storage.set(key, result);
+              }, refreshIntervalSec * 1000);
 
-            intervalTimerMap.set(key, true);
-          }
-
-          return result;
-        };
-
-        cacheEventEmitter.once(key, (instance) => {
-          descriptor.value.call(instance);
-
-          cacheEventEmitter.on(
-            `__${INTERNAL_KIND.PERSISTENT}=>${key}__`,
-            () => {
-              descriptor.value.call(instance);
+              intervalTimerMap.set(key, true);
             }
-          );
-        });
-      }
 
-      if (isTemporal(cacheOptions)) {
-        const { ttl, paramIndex } = cacheOptions;
+            return result;
+          };
 
-        Reflect.defineMetadata(key, INTERNAL_KIND.TEMPORAL, target);
+          cacheEventEmitter.once(key, (instance) => {
+            descriptor.value.call(instance);
 
-        descriptor.value = async function (...args: any[]) {
-          const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
-          mapCacheKeyToRootKey(cacheKey, key);
+            cacheEventEmitter.on(
+              `__${INTERNAL_KIND.PERSISTENT}=>${key}__`,
+              () => {
+                descriptor.value.call(instance);
+              }
+            );
+          });
+        }
 
-          if (await storage.has(cacheKey)) return storage.get(cacheKey);
+        if (isTemporal(cacheOptions)) {
+          const { ttl, paramIndex } = cacheOptions;
 
-          const result = await originalMethod.apply(this, args);
+          Reflect.defineMetadata(key, INTERNAL_KIND.TEMPORAL, target);
 
-          storage.set(cacheKey, result);
-
-          setTimeout(() => {
-            storage.delete(cacheKey);
-            rootKeyMap.get(key)?.delete(cacheKey);
-          }, ttl * 1000);
-
-          return result;
-        };
-      }
-
-      if (isBust(cacheOptions)) {
-        descriptor.value = async function (...args: any[]) {
-          const { paramIndex, bustAllChildren } = cacheOptions;
-
-          if (bustAllChildren && rootKeyMap.has(key)) {
-            // if the target of bust call is persistent cache, but bustAllChildren option is true,
-            // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
-            rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
-            rootKeyMap.delete(key);
-          } else {
+          descriptor.value = async function (...args: any[]) {
             const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
-            await storage.delete(cacheKey);
-            rootKeyMap.get(key)?.delete(cacheKey);
-          }
+            mapCacheKeyToRootKey(cacheKey, key);
 
-          const result = await originalMethod.apply(this, args);
+            if (await storage.has(cacheKey)) return storage.get(cacheKey);
 
-          if (Reflect.getMetadata(key, target) === INTERNAL_KIND.PERSISTENT) {
-            cacheEventEmitter.emit(`__${INTERNAL_KIND.PERSISTENT}=>${key}__`);
-          }
+            const result = await originalMethod.apply(this, args);
 
-          return result;
-        };
-      }
-      copyOriginalMetadataToCacheDescriptor(originalMethodMetadataKeys, originalMethod, descriptor);
+            storage.set(cacheKey, result);
 
-      SetMetadata(CACHE, cacheOptions)(descriptor.value);
+            setTimeout(() => {
+              storage.delete(cacheKey);
+              rootKeyMap.get(key)?.delete(cacheKey);
+            }, ttl * 1000);
 
-      return descriptor;
+            return result;
+          };
+        }
+
+        if (isBust(cacheOptions)) {
+          descriptor.value = async function (...args: any[]) {
+            const { paramIndex, bustAllChildren, addition } = cacheOptions;
+
+            if (bustAllChildren && rootKeyMap.has(key)) {
+              // if the target of bust call is persistent cache, but bustAllChildren option is true,
+              // nothing will be busted because persistent cache doesn't have mappings in rootKeyMap.
+              rootKeyMap.get(key).forEach((cacheKey) => storage.delete(cacheKey));
+              rootKeyMap.delete(key);
+            } else {
+              const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
+              await storage.delete(cacheKey);
+              rootKeyMap.get(key)?.delete(cacheKey);
+            }
+            if (addition) {
+              for (const additionalBusting of addition) {
+                if (additionalBusting.bustAllChildren && rootKeyMap.has(additionalBusting.key)) {
+                  rootKeyMap.get(additionalBusting.key).forEach((cacheKey) => storage.delete(cacheKey));
+                  rootKeyMap.delete(additionalBusting.key);
+                } else {
+                  const cacheKey = makeParamBasedCacheKey(additionalBusting.key, args, additionalBusting.paramIndex);
+                  await storage.delete(cacheKey);
+                  rootKeyMap.get(additionalBusting.key)?.delete(cacheKey);
+                }
+              }
+            }
+
+            const result = await originalMethod.apply(this, args);
+
+            if (Reflect.getMetadata(key, target) === INTERNAL_KIND.PERSISTENT) {
+              cacheEventEmitter.emit(`__${INTERNAL_KIND.PERSISTENT}=>${key}__`);
+            }
+
+            return result;
+          };
+        }
+        copyOriginalMetadataToCacheDescriptor(originalMethodMetadataKeys, originalMethod, descriptor);
+
+        SetMetadata(CACHE, cacheOptions)(descriptor.value);
+
+        return descriptor;
+      };
     };
-  };
 
 
 

@@ -250,7 +250,33 @@ class SomeController {
         ...
     }
 }
-
+```
+#### Additional Busting within one route
+In many cases, change to a single data affects multiple outputs. For example, if you modify "User" data, you have to remove caches of "User", "MyPage", "Friends". So, Omacache provide capability to remove all related caches at once.
+```typescript
+@Put("/users/:userId")
+@InMemoryCache({
+    kind: "bust",
+    key: "user",
+    paramIndex:[0],
+    // additional bustings
+    // It's same type of "bust" but except kind & addition
+    addition: [
+        {
+            key: "my_page",
+            // this would not remove cache if 
+            // route that sets "my_page" cache construct cache key with different parameter poisition 
+            paramIndex:[0]
+        },
+        {
+            key: "friends",
+            bustAllChildren: true   
+        }
+    ]  
+})
+modifyUser(@Param("userId") userId: string, @Body() body: any) {
+    ...
+}
 ```
 
 ## Caution

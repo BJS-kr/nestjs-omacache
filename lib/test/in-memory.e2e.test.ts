@@ -38,8 +38,8 @@ describe("e2e-in-memory", () => {
     // start server
     const moduleRef = await Test.createTestingModule({
       imports: [CacheModule],
-      controllers: [InMemTestController, RedisTestController],
-      providers: [InMemTestService, RedisTestService],
+      controllers: [InMemTestController],
+      providers: [InMemTestService],
     }).compile();
 
     app = moduleRef.createNestApplication();

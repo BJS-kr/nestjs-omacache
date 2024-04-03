@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { sleep, startTime } from "./util";
-import { InMemCache, RedisCache } from "./cache.decorator";
-import { InMemTestService, RedisTestService } from "./service";
+import {InMemCache, RedisCache, AnotherRedisCache} from "./cache.decorator";
+import {AnotherRedisTestService, InMemTestService, RedisTestService} from "./service";
 
 @Controller()
 export class InMemTestController {
@@ -44,7 +44,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 3,
+    ttl: 300,
   })
   async test3() {
     await sleep(1000);
@@ -56,7 +56,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 3,
+    ttl: 300,
     paramIndex: [0, 1],
   })
   async test3param(@Param("param") param: string, @Query("query") query: string) {
@@ -69,7 +69,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 3,
+    ttl: 300,
     paramIndex: [0],
   })
   async test3post(@Body() body: { [key: string]: any }) {
@@ -116,7 +116,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test6",
     kind: "temporal",
-    ttl: 10,
+    ttl: 300,
   })
   @Get("test6")
   async test6() {
@@ -128,7 +128,7 @@ export class InMemTestController {
   @InMemCache({
     key: "under_test6",
     kind: "temporal",
-    ttl: 10,
+    ttl: 300,
   })
   @Get("under_test6")
   async underTest6() {
@@ -192,7 +192,7 @@ export class RedisTestController {
   @RedisCache({
     key: "RedisTest3",
     kind: "temporal",
-    ttl: 3,
+    ttl: 300,
     paramIndex: [0, 1],
   })
   async RedisTest3(
@@ -204,14 +204,123 @@ export class RedisTestController {
     return "RedisTest3" + param + query;
   }
 
-  @Get("RedisTest3/bust")
+  @Get("RedisTest3bust")
   @RedisCache({
     key: "RedisTest3",
     kind: "bust",
+    bustAllChildren: true,
   })
   async RedisTest3bust() { }
 
+  @Get("RedisTest3-1")
+  @AnotherRedisCache({
+    key: "RedisTest3-1",
+    kind: "temporal",
+    ttl: 300,
+  })
+  async RedisTest3_1() {
+    await sleep(1000);
+    return "RedisTest3-1";
+  }
+
+  @Get("RedisTest3-1/bust")
+  @AnotherRedisCache({
+    key: "RedisTest3-1",
+    kind: "bust",
+  })
+  async RedisTest3_1bust() { }
+
   @Get("RedisTest4")
+  async partiallyCached() {
+    await this.testService.cacheableTask1();
+    await this.testService.notCacheableTask();
+    await this.testService.cacheableTask2();
+
+    return "RedisTest4";
+  }
+}
+
+@Controller()
+export class AnotherRedisTestController {
+  constructor(private readonly testService: AnotherRedisTestService) { }
+
+  @Get("AnotherRedisTest1")
+  @AnotherRedisCache({
+    key: "RedisTest1",
+    kind: "persistent",
+  })
+  async RedisTest1() {
+    await sleep(1000);
+
+    return "RedisTest1";
+  }
+
+  @Get("AnotherRedisTest2")
+  @AnotherRedisCache({
+    key: "RedisTest2",
+    kind: "persistent",
+    refreshIntervalSec: 2,
+  })
+  async RedisTest2() {
+    await sleep(1000);
+
+    if (Date.now() - startTime > 3000) {
+      return "modified RedisTest2";
+    } else {
+      return "RedisTest2";
+    }
+  }
+
+  @Get("AnotherRedisTest2/bust")
+  @AnotherRedisCache({
+    key: "RedisTest2",
+    kind: "bust",
+  })
+  async RedisTest2bust() { }
+
+  @Get("AnotherRedisTest3/:param")
+  @AnotherRedisCache({
+    key: "RedisTest3",
+    kind: "temporal",
+    ttl: 300,
+    paramIndex: [0, 1],
+  })
+  async RedisTest3(
+      @Param("param") param: string,
+      @Query("query") query: string
+  ) {
+    await sleep(1000);
+
+    return "RedisTest3" + param + query;
+  }
+
+  @Get("AnotherRedisTest3bust")
+  @AnotherRedisCache({
+    key: "RedisTest3",
+    kind: "bust",
+    bustAllChildren: true,
+  })
+  async RedisTest3bust() { }
+
+  @Get("AnotherRedisTest3-1")
+  @AnotherRedisCache({
+    key: "RedisTest3-1",
+    kind: "temporal",
+    ttl: 300,
+  })
+  async RedisTest3_1() {
+    await sleep(1000);
+    return "RedisTest3-1";
+  }
+
+  @Get("AnotherRedisTest3-1/bust")
+  @AnotherRedisCache({
+    key: "RedisTest3-1",
+    kind: "bust",
+  })
+  async RedisTest3_1bust() { }
+
+  @Get("AnotherRedisTest4")
   async partiallyCached() {
     await this.testService.cacheableTask1();
     await this.testService.notCacheableTask();

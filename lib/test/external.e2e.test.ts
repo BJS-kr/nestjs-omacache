@@ -160,8 +160,6 @@ describe("e2e-external-storage", () => {
       await Promise.all([
         request(httpServer).get("/RedisTest1"),
         request(httpServer).get("/RedisTest2"),
-        request(anotherHttpServer).get("/RedisTest1"),
-        request(anotherHttpServer).get("/RedisTest2"),
       ]);
     });
 

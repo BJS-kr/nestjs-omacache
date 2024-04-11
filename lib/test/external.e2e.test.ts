@@ -1,13 +1,13 @@
 import request from "supertest";
-import { describe, it, before, after } from "node:test";
+import { after, before, describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import {Test} from "@nestjs/testing";
-import {AnotherRedisTestService, RedisTestService} from "./service";
+import { Test } from "@nestjs/testing";
+import { AnotherRedisTestService, RedisTestService } from "./service";
 import { HttpServer, INestApplication } from "@nestjs/common";
 import { biggerThan, lessThan, sleep } from "./util";
 import { CacheModule } from "../cache.module";
-import {AnotherRedisTestController, RedisTestController} from "./controller";
-import {createClient} from "redis";
+import { AnotherRedisTestController, RedisTestController } from "./controller";
+import { createClient } from "redis";
 
 describe("e2e-external-storage", () => {
   let app: INestApplication;
@@ -15,7 +15,10 @@ describe("e2e-external-storage", () => {
   let anotherApp: INestApplication;
   let anotherHttpServer: HttpServer;
 
-  const redisClient = createClient({ url: 'redis://localhost:6379', name: 'test' });
+  const redisClient = createClient({
+    url: "redis://localhost:6379",
+    name: "test",
+  });
   redisClient.connect();
 
   before(async () => {
@@ -40,7 +43,7 @@ describe("e2e-external-storage", () => {
     anotherHttpServer = anotherApp.getHttpServer();
   });
 
-  after(async() => {
+  after(async () => {
     await redisClient.flushDb();
     await app.close();
     await anotherApp.close();
@@ -165,7 +168,9 @@ describe("e2e-external-storage", () => {
 
     it("should return cached value for the same cache key, even if request is sent by another server", async () => {
       const start = Date.now();
-      const response = await request(anotherHttpServer).get("/AnotherRedisTest1");
+      const response = await request(anotherHttpServer).get(
+        "/AnotherRedisTest1"
+      );
       const diff = Date.now() - start;
 
       lessThan(diff, 50);
@@ -175,28 +180,22 @@ describe("e2e-external-storage", () => {
     it("should bust cache for the same cache key, even if request is sent by another server", async () => {
       const start = Date.now();
       const response = await request(anotherHttpServer).get(
-          "/AnotherRedisTest3-1"
+        "/AnotherRedisTest3-1"
       );
       const diff = Date.now() - start;
       biggerThan(diff, 1000);
       equal(response.text, "RedisTest3-1");
 
       const start2 = Date.now();
-      const response2 = await request(httpServer).get(
-          "/RedisTest3-1"
-      );
+      const response2 = await request(httpServer).get("/RedisTest3-1");
       const diff2 = Date.now() - start2;
       lessThan(diff2, 50);
       equal(response2.text, "RedisTest3-1");
 
-      await request(httpServer).get(
-          "/RedisTest3-1/bust"
-      );
+      await request(httpServer).get("/RedisTest3-1/bust");
 
       const start3 = Date.now();
-      const response3 = await request(httpServer).get(
-          "/RedisTest3-1"
-      );
+      const response3 = await request(httpServer).get("/RedisTest3-1");
       const diff3 = Date.now() - start3;
       biggerThan(diff3, 1000);
       equal(response3.text, "RedisTest3-1");
@@ -204,25 +203,29 @@ describe("e2e-external-storage", () => {
 
     it("should should bust all param based cache with a key if bustAllChildren is true", async () => {
       const startAB1 = Date.now();
-      const responseAB1 = await request(httpServer).get("/RedisTest3/A?query=B");
+      const responseAB1 = await request(httpServer).get(
+        "/RedisTest3/A?query=B"
+      );
       biggerThan(Date.now() - startAB1, 1000);
       equal(responseAB1.text, "RedisTest3AB");
 
       const startCD1 = Date.now();
       const responseCD1 = await request(anotherHttpServer).get(
-          "/AnotherRedisTest3/C?query=D"
+        "/AnotherRedisTest3/C?query=D"
       );
       biggerThan(Date.now() - startCD1, 1000);
       equal(responseCD1.text, "RedisTest3CD");
 
       const startAB2 = Date.now();
-      const responseAB2 = await request(anotherHttpServer).get("/AnotherRedisTest3/A?query=B");
+      const responseAB2 = await request(anotherHttpServer).get(
+        "/AnotherRedisTest3/A?query=B"
+      );
       lessThan(Date.now() - startAB2, 50);
       equal(responseAB2.text, "RedisTest3AB");
 
       const startCD2 = Date.now();
       const responseCD2 = await request(httpServer).get(
-          "/RedisTest3/C?query=D"
+        "/RedisTest3/C?query=D"
       );
       lessThan(Date.now() - startCD2, 50);
       equal(responseCD2.text, "RedisTest3CD");
@@ -232,13 +235,15 @@ describe("e2e-external-storage", () => {
       await sleep(2000);
 
       const startAB3 = Date.now();
-      const responseAB3 = await request(httpServer).get("/RedisTest3/A?query=B");
+      const responseAB3 = await request(httpServer).get(
+        "/RedisTest3/A?query=B"
+      );
       biggerThan(Date.now() - startAB3, 1000);
       equal(responseAB3.text, "RedisTest3AB");
 
       const startCD3 = Date.now();
       const responseCD3 = await request(anotherHttpServer).get(
-          "/AnotherRedisTest3/C?query=D"
+        "/AnotherRedisTest3/C?query=D"
       );
       biggerThan(Date.now() - startCD3, 1000);
       equal(responseCD3.text, "RedisTest3CD");
@@ -253,7 +258,9 @@ describe("e2e-external-storage", () => {
       equal(response.text, "RedisTest4");
 
       const start = Date.now();
-      const response2 = await request(anotherHttpServer).get("/AnotherRedisTest4");
+      const response2 = await request(anotherHttpServer).get(
+        "/AnotherRedisTest4"
+      );
       const diff2 = Date.now() - start;
 
       biggerThan(diff2, 1000);

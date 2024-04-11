@@ -1,11 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { sleep, startTime } from "./util";
-import {InMemCache, RedisCache, AnotherRedisCache} from "./cache.decorator";
-import {AnotherRedisTestService, InMemTestService, RedisTestService} from "./service";
+import { InMemCache, RedisCache, AnotherRedisCache } from "./cache.decorator";
+import {
+  AnotherRedisTestService,
+  InMemTestService,
+  RedisTestService,
+} from "./service";
 
 @Controller()
 export class InMemTestController {
-  constructor(private readonly testService: InMemTestService) { }
+  constructor(private readonly testService: InMemTestService) {}
   @Get("test1")
   @InMemCache({
     key: "test1",
@@ -38,7 +50,7 @@ export class InMemTestController {
     key: "test2",
     kind: "bust",
   })
-  async test2bust() { }
+  async test2bust() {}
 
   @Get("test3/noParam")
   @InMemCache({
@@ -59,7 +71,10 @@ export class InMemTestController {
     ttl: 300,
     paramIndex: [0, 1],
   })
-  async test3param(@Param("param") param: string, @Query("query") query: string) {
+  async test3param(
+    @Param("param") param: string,
+    @Query("query") query: string
+  ) {
     await sleep(1000);
 
     return "test3" + param + query;
@@ -83,7 +98,7 @@ export class InMemTestController {
     key: "test3",
     kind: "bust",
   })
-  async test3bust() { }
+  async test3bust() {}
 
   @Get("test3/rootKeyBust")
   @InMemCache({
@@ -91,7 +106,7 @@ export class InMemTestController {
     kind: "bust",
     bustAllChildren: true,
   })
-  async test3RootKeyBust() { }
+  async test3RootKeyBust() {}
 
   @Get("test4")
   async partiallyCached() {
@@ -144,15 +159,15 @@ export class InMemTestController {
     addition: [
       {
         key: "under_test6",
-      }
-    ]
+      },
+    ],
   })
-  async test6bust() { }
+  async test6bust() {}
 }
 
 @Controller()
 export class RedisTestController {
-  constructor(private readonly testService: RedisTestService) { }
+  constructor(private readonly testService: RedisTestService) {}
 
   @Get("RedisTest1")
   @RedisCache({
@@ -186,7 +201,7 @@ export class RedisTestController {
     key: "RedisTest2",
     kind: "bust",
   })
-  async RedisTest2bust() { }
+  async RedisTest2bust() {}
 
   @Get("RedisTest3/:param")
   @RedisCache({
@@ -210,7 +225,7 @@ export class RedisTestController {
     kind: "bust",
     bustAllChildren: true,
   })
-  async RedisTest3bust() { }
+  async RedisTest3bust() {}
 
   @Get("RedisTest3-1")
   @AnotherRedisCache({
@@ -228,7 +243,7 @@ export class RedisTestController {
     key: "RedisTest3-1",
     kind: "bust",
   })
-  async RedisTest3_1bust() { }
+  async RedisTest3_1bust() {}
 
   @Get("RedisTest4")
   async partiallyCached() {
@@ -242,7 +257,7 @@ export class RedisTestController {
 
 @Controller()
 export class AnotherRedisTestController {
-  constructor(private readonly testService: AnotherRedisTestService) { }
+  constructor(private readonly testService: AnotherRedisTestService) {}
 
   @Get("AnotherRedisTest1")
   @AnotherRedisCache({
@@ -276,7 +291,7 @@ export class AnotherRedisTestController {
     key: "RedisTest2",
     kind: "bust",
   })
-  async RedisTest2bust() { }
+  async RedisTest2bust() {}
 
   @Get("AnotherRedisTest3/:param")
   @AnotherRedisCache({
@@ -286,8 +301,8 @@ export class AnotherRedisTestController {
     paramIndex: [0, 1],
   })
   async RedisTest3(
-      @Param("param") param: string,
-      @Query("query") query: string
+    @Param("param") param: string,
+    @Query("query") query: string
   ) {
     await sleep(1000);
 
@@ -300,7 +315,7 @@ export class AnotherRedisTestController {
     kind: "bust",
     bustAllChildren: true,
   })
-  async RedisTest3bust() { }
+  async RedisTest3bust() {}
 
   @Get("AnotherRedisTest3-1")
   @AnotherRedisCache({
@@ -318,7 +333,7 @@ export class AnotherRedisTestController {
     key: "RedisTest3-1",
     kind: "bust",
   })
-  async RedisTest3_1bust() { }
+  async RedisTest3_1bust() {}
 
   @Get("AnotherRedisTest4")
   async partiallyCached() {

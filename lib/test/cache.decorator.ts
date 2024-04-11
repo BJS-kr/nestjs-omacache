@@ -8,7 +8,7 @@ export class RedisCacheStorage implements ICacheStorage {
     private client
 
     constructor() {
-        this.client = createClient({ url: 'redis://localhost:6379' });
+        this.client = createClient({ url: 'redis://localhost:6379', name: 'class' });
         this.client.connect();
     }
 
@@ -42,5 +42,5 @@ export class RedisCacheStorage implements ICacheStorage {
     }
 }
 
-
 export const RedisCache = Cache({ storage: new RedisCacheStorage() });
+export const AnotherRedisCache = Cache({ storage: new RedisCacheStorage() });

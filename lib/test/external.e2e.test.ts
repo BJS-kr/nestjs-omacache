@@ -233,6 +233,7 @@ describe("e2e-external-storage", () => {
       /* bust all cache */
       await request(httpServer).get("/RedisTest3bust");
       await sleep(2000);
+      /* bust all cache */
 
       const startAB3 = Date.now();
       const responseAB3 = await request(httpServer).get(

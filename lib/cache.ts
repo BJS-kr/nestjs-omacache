@@ -32,7 +32,7 @@ const setChildCacheKey = async (
     storage.set(rootKey, JSON.stringify({ [cacheKey]: 1 }));
     return;
   }
-  const children = JSON.parse(await storage.get(rootKey));
+  const children = await getChildrenObject(storage, rootKey);
   if (children[cacheKey]) return;
   children[cacheKey] = 1;
   storage.set(rootKey, JSON.stringify(children));
@@ -44,7 +44,7 @@ const deleteChildCacheKey = async (
   rootKey: RootKey
 ) => {
   if (await storage.has(rootKey)) {
-    const children = JSON.parse(await storage.get(rootKey));
+    const children = await getChildrenObject(storage, rootKey);
     delete children[cacheKey];
     storage.set(rootKey, JSON.stringify(children));
   }
@@ -55,12 +55,25 @@ const deleteAllChildrenByRootKey = async (
   rootKey: RootKey,
   originalKey: string
 ) => {
-  const children = JSON.parse(await storage.get(rootKey));
-  for (const key in children) {
-    storage.delete(key);
+  if (await storage.has(rootKey)) {
+    const children = await getChildrenObject(storage, rootKey);
+    for (const key in children) {
+      storage.delete(key);
+    }
+    storage.delete(rootKey);
+    storage.delete(originalKey);
   }
-  storage.delete(rootKey);
-  storage.delete(originalKey);
+};
+
+const getChildrenObject = async (storage, rootKey) => {
+  if (!rootKey.endsWith(ROOT_KEY_SUFFIX)) {
+    throw new Error("Invalid root key");
+  }
+  try {
+    return JSON.parse(await storage.get(rootKey));
+  } catch (e) {
+    throw new Error("cannot parse children object");
+  }
 };
 
 function copyOriginalMetadataToCacheDescriptor(

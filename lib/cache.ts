@@ -7,6 +7,18 @@ import "reflect-metadata";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
+const timeouts: NodeJS.Timeout[] = [];
+const intervals: NodeJS.Timeout[] = [];
+
+export function clearAllTimeouts() {
+  for (const timeout of timeouts) {
+    clearTimeout(timeout);
+  }
+  for (const interval of intervals) {
+    clearInterval(interval);
+  }
+}
+
 type RootKey = `${string}${typeof ROOT_KEY_SUFFIX}`;
 const ROOT_KEY_SUFFIX = "__ROOT_KEY__" as const;
 
@@ -115,7 +127,7 @@ export const Cache =
           storage.set(key, result);
 
           if (refreshIntervalSec && !intervalTimerMap.has(key)) {
-            setInterval(() => {
+            const interval = setInterval(() => {
               const result = originalMethod.call(this);
 
               result instanceof Promise
@@ -125,6 +137,7 @@ export const Cache =
                 : storage.set(key, result);
             }, refreshIntervalSec * 1000);
 
+            intervals.push(interval);
             intervalTimerMap.set(key, true);
           }
 
@@ -161,12 +174,14 @@ export const Cache =
 
           storage.set(cacheKey, result);
 
-          setTimeout(async () => {
+          const timeout = setTimeout(async () => {
             storage.delete(cacheKey);
             if (await storage.has(rootKey)) {
               deleteChildCacheKey(storage, cacheKey, rootKey);
             }
           }, ttl * 1000);
+
+          timeouts.push(timeout);
 
           return result;
         };

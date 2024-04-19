@@ -12,7 +12,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "ts-node lib/test/test.runner.ts",
+    "test": "ts-node lib/test/runner.ts",
     "build": "rimraf dist && tsc"
   },
   "devDependencies": {

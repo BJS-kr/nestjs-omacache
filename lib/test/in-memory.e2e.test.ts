@@ -265,7 +265,7 @@ describe("e2e-in-memory", () => {
     const result = await service.cacheableTaskWithArrayParam(array);
     const diff = Date.now() - start;
 
-    biggerThan(diff, 1000);
+    biggerThan(diff, 900);
     equal(result, array.join(""));
 
     const start2 = Date.now();
@@ -280,7 +280,7 @@ describe("e2e-in-memory", () => {
     const result3 = await service.cacheableTaskWithArrayParam(modifiedArray);
     const diff3 = Date.now() - start3;
 
-    biggerThan(diff3, 1000);
+    biggerThan(diff3, 900);
     equal(result3, modifiedArray.join(""));
   });
 

@@ -2,7 +2,7 @@ name: Omacahce Package
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -15,7 +15,6 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm test
-      - run: npm run build
 
   publish-npm:
     needs: build
@@ -29,5 +28,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm publish
+      - run: npm run build
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

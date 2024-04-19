@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { sleep } from "./util";
-import {InMemCache, RedisCache, AnotherRedisCache} from "./cache.decorator";
+import { InMemCache, RedisCache, AnotherRedisCache } from "./cache.decorator";
 
 @Injectable()
 export class InMemTestService {
@@ -71,28 +71,28 @@ export class RedisTestService {
 
 @Injectable()
 export class AnotherRedisTestService {
-    @AnotherRedisCache({
-        key: "cacheableTask1",
-        kind: "temporal",
-        ttl: 300,
-    })
-    async cacheableTask1() {
-        await sleep(1000);
-        return true;
-    }
+  @AnotherRedisCache({
+    key: "cacheableTask1",
+    kind: "temporal",
+    ttl: 300,
+  })
+  async cacheableTask1() {
+    await sleep(1000);
+    return true;
+  }
 
-    async cacheableTask2() {
-        await sleep(1000);
-        return true;
-    }
+  async cacheableTask2() {
+    await sleep(1000);
+    return true;
+  }
 
-    @AnotherRedisCache({
-        key: "cacheableTask3",
-        kind: "temporal",
-        ttl: 300,
-    })
-    async notCacheableTask() {
-        await sleep(1000);
-        return true;
-    }
+  @AnotherRedisCache({
+    key: "cacheableTask3",
+    kind: "temporal",
+    ttl: 300,
+  })
+  async notCacheableTask() {
+    await sleep(1000);
+    return true;
+  }
 }

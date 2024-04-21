@@ -18,6 +18,7 @@ export type CacheOptions<Kind extends CacheKind> = CacheOptionSchema[Kind] & {
 export interface ICacheStorage {
   get(key: string): any;
   set(key: string, value: any): any;
+  set(key: string, value: any, ttl?: number): any;
   delete(key: string): boolean | Promise<boolean>;
   has(key: string): boolean | Promise<boolean>;
 }

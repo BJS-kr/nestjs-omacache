@@ -7,7 +7,8 @@ import { HttpServer, INestApplication } from "@nestjs/common";
 import { biggerThan, lessThan, sleep } from "./util";
 import { CacheModule } from "../cache.module";
 import { InMemTestController } from "./controller";
-import { clearAllTimeouts } from "../cache";
+import { intervals } from "../cache";
+import { defaultStorage } from "./cache.decorator";
 
 let httpServer: HttpServer;
 let app: INestApplication;
@@ -47,7 +48,8 @@ describe("e2e-in-memory", () => {
 
   after(async () => {
     await app.close();
-    clearAllTimeouts();
+    intervals.forEach(clearInterval);
+    defaultStorage.clear();
   });
 
   it("should return immediately(set on start). test1 route", async () => {

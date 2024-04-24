@@ -4,10 +4,11 @@ import { CACHE } from "./constants";
 import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
 import { isBust, isPersistent, isTemporal } from "./guard";
 import "reflect-metadata";
+import { DefaultStorage } from "./default.storage";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
-const intervals: NodeJS.Timeout[] = [];
+export const intervals: NodeJS.Timeout[] = [];
 
 type RootKey = `${string}${typeof ROOT_KEY_SUFFIX}`;
 const ROOT_KEY_SUFFIX = "__ROOT_KEY__" as const;
@@ -90,7 +91,9 @@ function copyOriginalMetadataToCacheDescriptor(
 }
 
 export const Cache =
-  ({ storage }: { storage: ICacheStorage }) =>
+  (
+    { storage }: { storage: ICacheStorage } = { storage: new DefaultStorage() }
+  ) =>
   <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
     return (
       target: any,

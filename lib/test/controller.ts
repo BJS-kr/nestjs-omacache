@@ -14,7 +14,7 @@ import {
   InMemTestService,
   RedisTestService,
 } from "./service";
-
+import { SECOND } from "../time.constants";
 @Controller()
 export class InMemTestController {
   constructor(private readonly testService: InMemTestService) {}
@@ -56,7 +56,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
   })
   async test3() {
     await sleep(1000);
@@ -68,7 +68,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
     paramIndex: [0, 1],
   })
   async test3param(
@@ -84,7 +84,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test3",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
     paramIndex: [0],
   })
   async test3post(@Body() body: { [key: string]: any }) {
@@ -131,7 +131,7 @@ export class InMemTestController {
   @InMemCache({
     key: "test6",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
   })
   @Get("test6")
   async test6() {
@@ -143,7 +143,7 @@ export class InMemTestController {
   @InMemCache({
     key: "under_test6",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
   })
   @Get("under_test6")
   async underTest6() {
@@ -207,7 +207,7 @@ export class RedisTestController {
   @RedisCache({
     key: "RedisTest3",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
     paramIndex: [0, 1],
   })
   async RedisTest3(
@@ -231,7 +231,7 @@ export class RedisTestController {
   @AnotherRedisCache({
     key: "RedisTest3-1",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
   })
   async RedisTest3_1() {
     await sleep(1000);
@@ -297,7 +297,7 @@ export class AnotherRedisTestController {
   @AnotherRedisCache({
     key: "RedisTest3",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
     paramIndex: [0, 1],
   })
   async RedisTest3(
@@ -321,7 +321,7 @@ export class AnotherRedisTestController {
   @AnotherRedisCache({
     key: "RedisTest3-1",
     kind: "temporal",
-    ttl: 300,
+    ttl: 300 * SECOND,
   })
   async RedisTest3_1() {
     await sleep(1000);

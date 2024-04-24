@@ -3,8 +3,13 @@ type CacheOptionSchema = {
   persistent: {
     refreshIntervalSec?: number;
   };
-  bust: { paramIndex?: number[], bustAllChildren?: boolean, addition?: Omit<CacheOptions<"bust">, "additon" | "kind">[] };
+  bust: {
+    paramIndex?: number[];
+    bustAllChildren?: boolean;
+    addition?: Omit<CacheOptions<"bust">, "additon" | "kind">[];
+  };
 };
+
 export const enum INTERNAL_KIND {
   PERSISTENT = 0,
   TEMPORAL = 1,

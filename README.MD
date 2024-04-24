@@ -3,7 +3,6 @@
 <p align="center">
 <img src="https://github.com/TeamSparta-Inc/nestjs-cache/assets/119388148/c686a2a8-a785-4dba-8a5c-6bce1dd68b45" alt="omacache_logo" width="350" class="center"/>
 </p>
-
 ## Motivation
 
 Nest's cache-manager has limitations and inconveniences(i.e. cache applied for controller only).
@@ -56,9 +55,11 @@ class RedisStorage implements ICacheStorage {
 const ExternalCache = Cache({ storage: new RedisStorage() })
 
 // ...or
-// Map implements all the signatures of ICacheStorage
-// so you can just pass Map instance
-const InMemoryCache = Cache({ storage: new Map() satisfies ICacheStorage });
+// you can just initialize it using default storage
+// default storage is in-memory, timeout based TTL cache container
+// it is mainly for simple scenarios, so it does not have cache eviction mechanism
+// make sure you are not making memory overhead by using default in-memory storage
+const InMemoryCache = Cache();
 ```
 
 ### Use it anywhere
@@ -85,7 +86,7 @@ class AppController {
     @ExternalCache({
         key: 'other key',
         kind: 'temporal',
-        ttl: 60 * 10, // 10 mins
+        ttl: 10 * MIN, // 10 mins
         // You have to specify parameter indexes which will be referenced dynamically
         // In this case, cache key will be concatenated string of key, id param, q2 query
         paramIndex: [0, 2]
@@ -178,7 +179,7 @@ class SomeController {
     @InMemoryCache({
         key: 'some',
         kind:'temporal',
-        ttl: 30,
+        ttl: 30 * SECOND, // 30 seconds
     })
     getSome() {
         ...
@@ -199,7 +200,7 @@ class SomeController {
     @ExternalCache({
         key: 'some',
         kind:'temporal',
-        ttl: 30,
+        ttl: 30 * SECOND, // 30 seconds
         paramIndex: [0, 1]
     })
     getSomeOther(@Param('p1') p1: string, @Param('p2') p2: string) {
@@ -216,30 +217,30 @@ class SomeController {
     updateSomeOther(@Param('p1') p1: string, @Param('p2') p2: string) {
         ...
     }
-    
+
     // if you want to unset all cache based on a key, you can use bustAllChildren option.
     // this will only work for temporal cache.
     @Get('/foo')
     @ExternalCache({
         key: 'foo',
         kind: 'temporal',
-        ttl: 30,
+        ttl: 30 * SECOND,
     })
     getFoo() {
         ...
     }
-    
+
     @Get('foo/:p1/:p2')
     @ExternalCache({
         key: 'foo',
         kind: 'temporal',
-        ttl: 30,
+        ttl: 30 * SECOND,
         paramIndex: [0, 1]
     })
     getFooOther(@Param('p1') p1: string, @Param('p2') p2: string) {
         ...
     }
-    
+
     @Patch('/foo')
     @ExternalCache({
         key: 'foo',
@@ -251,8 +252,11 @@ class SomeController {
     }
 }
 ```
+
 #### Additional Busting within one route
+
 In many cases, change to a single data affects multiple outputs. For example, if you modify "User" data, you have to remove caches of "User", "MyPage", "Friends". So, Omacache provide capability to remove all related caches at once.
+
 ```typescript
 @Put("/users/:userId")
 @InMemoryCache({
@@ -264,15 +268,15 @@ In many cases, change to a single data affects multiple outputs. For example, if
     addition: [
         {
             key: "my_page",
-            // this would not remove cache if 
-            // route that sets "my_page" cache construct cache key with different parameter poisition 
+            // this would not remove cache if
+            // route that sets "my_page" cache construct cache key with different parameter poisition
             paramIndex:[0]
         },
         {
             key: "friends",
-            bustAllChildren: true   
+            bustAllChildren: true
         }
-    ]  
+    ]
 })
 modifyUser(@Param("userId") userId: string, @Body() body: any) {
     ...

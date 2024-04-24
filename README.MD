@@ -44,9 +44,10 @@ import { Cache, ICacheStorage } from "nestjs-omacache";
 
 // for example, we can use redis for storage
 // What ever your implementation is, it must satisfies ICacheStorage interface.
+// set() ttl param is optional, but implementing signature including ttl is strongly recommended
 class RedisStorage implements ICacheStorage {
     get(key: string) {...}
-    set(key: string, val: any) {...}
+    set(key: string, val: any, ttl: number) {...}
     has(key: string) {...}
     delete(key: string) {...}
 }

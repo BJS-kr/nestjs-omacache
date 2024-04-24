@@ -3,7 +3,7 @@
 <p align="center"> 
 <img src="https://github.com/TeamSparta-Inc/nestjs-cache/assets/119388148/c686a2a8-a785-4dba-8a5c-6bce1dd68b45" alt="omacache_logo" width="350" align="center"/>
 <br/>
-<em align="center">by talented designer, <a href="mailto:dh.kim@teamsparta.co">dh.kim@teamsparta.co</a></em>
+<em align="center">by talented designer, <a href="mailto:kdh0178@gmail.com">kdh0178@gmail.com</a></em>
 </p>
 
 ## Motivation

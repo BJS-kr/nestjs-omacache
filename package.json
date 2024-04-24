@@ -1,6 +1,6 @@
 {
   "name": "nestjs-omacache",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "simple, flexible and powerful cache decorator factory for NestJS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,4 +1,4 @@
-import { ICacheStorage } from "../dist";
+import { ICacheStorage } from "./types";
 
 export class DefaultStorage implements ICacheStorage {
   #storage: Map<string, any> = new Map();

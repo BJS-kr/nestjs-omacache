@@ -1,8 +1,10 @@
 # NestJS-Omacache
 
 <p align="center">
-<img src="https://github.com/TeamSparta-Inc/nestjs-cache/assets/119388148/c686a2a8-a785-4dba-8a5c-6bce1dd68b45" alt="omacache_logo" width="350" class="center"/>
+<img src="https://github.com/TeamSparta-Inc/nestjs-cache/assets/119388148/c686a2a8-a785-4dba-8a5c-6bce1dd68b45" alt="omacache_logo" width="350"/>
+<em style="white-space: nowrap;">by talented designer, <a href="mailto:dh.kim@teamsparta.co">kdh0178@gmail.com</a></em>
 </p>
+
 ## Motivation
 
 Nest's cache-manager has limitations and inconveniences(i.e. cache applied for controller only).

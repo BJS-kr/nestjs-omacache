@@ -1,32 +1,27 @@
+import { LRUCache } from "lru-cache";
 import { ICacheStorage } from "./types";
+import { DAY } from "./time.constants";
 
 export class DefaultStorage implements ICacheStorage {
-  #storage: Map<string, any> = new Map();
-  #timeouts: Map<string, NodeJS.Timeout> = new Map();
+  constructor(size: number = 1000, ttl: number = DAY) {
+    this.#storage = new LRUCache({
+      max: size,
+      ttl,
+    });
+  }
+  #storage: LRUCache<any, any>;
 
   get(key: string) {
     return this.#storage.get(key);
   }
 
   set(key: string, value: any, ttl?: number) {
-    if (ttl && ttl > 0) {
-      const timeout = setTimeout(() => {
-        this.delete(key);
-      }, ttl);
-
-      this.#timeouts.set(key, timeout);
-    }
-
-    this.#storage.set(key, value);
+    this.#storage.set(key, value, {
+      ttl,
+    });
   }
 
   delete(key: string) {
-    const timer = this.#timeouts.get(key);
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-
     return this.#storage.delete(key);
   }
 
@@ -35,10 +30,6 @@ export class DefaultStorage implements ICacheStorage {
   }
 
   clear() {
-    for (const timeout of this.#timeouts.values()) {
-      clearTimeout(timeout);
-    }
-
     this.#storage.clear();
   }
 }

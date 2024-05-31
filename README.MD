@@ -42,7 +42,6 @@ export class AppModule {}
 
 ```typescript
 // imported 'Cache' is factory to receive storage that implements ICacheStorage
-// in this example, we'll initialize in-memory cache
 import { Cache, ICacheStorage } from "nestjs-omacache";
 
 // for example, we can use redis for storage
@@ -59,11 +58,13 @@ class RedisStorage implements ICacheStorage {
 const ExternalCache = Cache({ storage: new RedisStorage() })
 
 // ...or
-// you can just initialize it using default storage
-// default storage is in-memory, timeout based TTL cache container
-// it is mainly for simple scenarios, so it does not have cache eviction mechanism
+// you can just initialize it using default storage(in-memory cache)
+// default storage is based on lru-cache package, so it can handle TTL and cache eviction
+// default max size is 10000
 // make sure you are not making memory overhead by using default in-memory storage
 const InMemoryCache = Cache();
+
+// you can implement your custom in-memory cache, which is more configurable.
 ```
 
 ### Use it anywhere

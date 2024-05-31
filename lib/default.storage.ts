@@ -3,10 +3,9 @@ import { ICacheStorage } from "./types";
 import { DAY } from "./time.constants";
 
 export class DefaultStorage implements ICacheStorage {
-  constructor(size: number = 1000, ttl: number = DAY) {
+  constructor(size: number = 10000) {
     this.#storage = new LRUCache({
       max: size,
-      ttl,
     });
   }
   #storage: LRUCache<any, any>;

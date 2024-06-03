@@ -1,6 +1,5 @@
 import { LRUCache } from "lru-cache";
 import { ICacheStorage } from "./types";
-import { DAY } from "./time.constants";
 
 export class DefaultStorage implements ICacheStorage {
   constructor(size: number = 10000) {

@@ -1,10 +1,23 @@
-import { SetMetadata } from "@nestjs/common";
+import {
+  CallHandler,
+  ExecutionContext,
+  NestInterceptor,
+  SetMetadata,
+  UseInterceptors,
+} from "@nestjs/common";
 import { EventEmitter } from "events";
 import { CACHE } from "./constants";
 import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
-import { isBust, isPersistent, isTemporal } from "./guard";
+import {
+  isBust,
+  isDynamicBust,
+  isDynamicTemporal,
+  isPersistent,
+  isTemporal,
+} from "./guard";
 import "reflect-metadata";
 import { DefaultStorage } from "./default.storage";
+import { Request } from "express";
 
 export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
@@ -36,7 +49,9 @@ const setChildCacheKey = async (
     return;
   }
   const children = await getChildrenObject(storage, rootKey);
+
   if (children[cacheKey]) return;
+
   children[cacheKey] = 1;
   storage.set(rootKey, JSON.stringify(children));
 };
@@ -72,11 +87,8 @@ const getChildrenObject = async (storage, rootKey) => {
   if (!rootKey.endsWith(ROOT_KEY_SUFFIX)) {
     throw new Error("Invalid root key");
   }
-  try {
-    return JSON.parse(await storage.get(rootKey));
-  } catch (e) {
-    throw new Error("cannot parse children object");
-  }
+
+  return JSON.parse(await storage.get(rootKey));
 };
 
 function copyOriginalMetadataToCacheDescriptor(
@@ -90,12 +102,21 @@ function copyOriginalMetadataToCacheDescriptor(
   });
 }
 
-export const Cache =
-  (
-    { storage }: { storage: ICacheStorage } = { storage: new DefaultStorage() }
-  ) =>
-  <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
-    return (
+export const Cache = <ControllerOnly extends boolean = false>(
+  {
+    storage,
+    controllerOnly,
+  }: {
+    storage: ICacheStorage;
+    controllerOnly?: ControllerOnly;
+  } = {
+    storage: new DefaultStorage(),
+  }
+) => {
+  return <Kind extends CacheKind, Dynamic extends boolean>(
+    cacheOptions: CacheOptions<Kind, Dynamic, ControllerOnly>
+  ) => {
+    const newDescriptor = (
       target: any,
       _propertyKey: string,
       descriptor: PropertyDescriptor
@@ -103,10 +124,9 @@ export const Cache =
       const originalMethod = descriptor.value;
       const originalMethodMetadataKeys =
         Reflect.getMetadataKeys(originalMethod);
-      const { key } = cacheOptions;
 
       if (isPersistent(cacheOptions)) {
-        const { refreshIntervalSec } = cacheOptions;
+        const { refreshIntervalSec, key } = cacheOptions;
 
         Reflect.defineMetadata(key, INTERNAL_KIND.PERSISTENT, target);
 
@@ -150,13 +170,14 @@ export const Cache =
       }
 
       if (isTemporal(cacheOptions)) {
-        const { ttl, paramIndex } = cacheOptions;
+        const { ttl, paramIndex, key } = cacheOptions;
 
         Reflect.defineMetadata(key, INTERNAL_KIND.TEMPORAL, target);
 
         descriptor.value = async function (...args: any[]) {
           const cacheKey = makeParamBasedCacheKey(key, args, paramIndex);
           const rootKey = makeRootKey(key);
+
           if (paramIndex?.length) {
             setChildCacheKey(storage, cacheKey, rootKey);
           }
@@ -173,7 +194,7 @@ export const Cache =
 
       if (isBust(cacheOptions)) {
         descriptor.value = async function (...args: any[]) {
-          const { paramIndex, bustAllChildren, addition } = cacheOptions;
+          const { paramIndex, bustAllChildren, addition, key } = cacheOptions;
           const rootKey = makeRootKey(key);
           if (bustAllChildren && (await storage.has(rootKey))) {
             deleteAllChildrenByRootKey(storage, rootKey, key);
@@ -188,6 +209,7 @@ export const Cache =
 
           for (const additionalBusting of addition || []) {
             const additionalRootKey = makeRootKey(additionalBusting.key);
+
             if (
               additionalBusting.bustAllChildren &&
               (await storage.has(additionalRootKey))
@@ -220,6 +242,7 @@ export const Cache =
           return result;
         };
       }
+
       copyOriginalMetadataToCacheDescriptor(
         originalMethodMetadataKeys,
         originalMethod,
@@ -230,4 +253,31 @@ export const Cache =
 
       return descriptor;
     };
+
+    if (isDynamicTemporal(cacheOptions)) {
+      class CacheInterceptor implements NestInterceptor {
+        intercept(context: ExecutionContext, next: CallHandler) {
+          const key = context.switchToHttp().getRequest<Request>().url;
+
+          return next.handle();
+        }
+      }
+
+      return UseInterceptors(CacheInterceptor);
+    }
+
+    if (isDynamicBust(cacheOptions)) {
+      class CacheInterceptor implements NestInterceptor {
+        intercept(context: ExecutionContext, next: CallHandler) {
+          const key = context.switchToHttp().getRequest<Request>().url;
+
+          return next.handle();
+        }
+      }
+
+      return UseInterceptors(CacheInterceptor);
+    }
+
+    return newDescriptor;
   };
+};

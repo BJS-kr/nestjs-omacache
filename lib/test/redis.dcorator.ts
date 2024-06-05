@@ -1,12 +1,5 @@
-import { Cache } from "../cache";
 import { createClient } from "redis";
-import { ICacheStorage } from "../types";
-import { DefaultStorage } from "../default.storage";
-export const defaultStorage = new DefaultStorage();
-export const InMemCache = Cache({
-  storage: defaultStorage,
-  controllerOnly: true,
-});
+import { Cache, ICacheStorage } from "../../dist";
 
 export class RedisCacheStorage implements ICacheStorage {
   private client;

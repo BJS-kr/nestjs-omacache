@@ -2,7 +2,7 @@ import { SetMetadata } from "@nestjs/common";
 import { EventEmitter } from "events";
 import { CACHE } from "./constants";
 import { CacheBuildOption, CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
-import { isBust, isPersistent, isTemporal } from "./guard";
+import { isDynamicBust, isDynamicTemporal, isPersistent, isStaticBust, isStaticTemporal,  } from "./guard";
 import "reflect-metadata";
 import { DefaultStorage } from "./default.storage";
 
@@ -91,10 +91,10 @@ function copyOriginalMetadataToCacheDescriptor(
 }
 
 export const Cache =
-  (
-    { storage, controllerOnly }: CacheBuildOption = { storage: new DefaultStorage() }
+  <CO extends boolean = false>(
+    { storage, controllerOnly }: CacheBuildOption<CO> = { storage: new DefaultStorage() }
   ) =>
-  <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
+  <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind, CO, boolean>) => {
     return (
       target: any,
       _propertyKey: string,
@@ -103,10 +103,9 @@ export const Cache =
       const originalMethod = descriptor.value;
       const originalMethodMetadataKeys =
         Reflect.getMetadataKeys(originalMethod);
-      const { key } = cacheOptions;
 
       if (isPersistent(cacheOptions)) {
-        const { refreshIntervalSec } = cacheOptions;
+        const { refreshIntervalSec, key } = cacheOptions;
 
         Reflect.defineMetadata(key, INTERNAL_KIND.PERSISTENT, target);
 
@@ -149,8 +148,9 @@ export const Cache =
         });
       }
 
-      if (isTemporal(cacheOptions)) {
-        const { ttl, paramIndex } = cacheOptions;
+      if (isStaticTemporal(cacheOptions)) {
+        
+        const { ttl, paramIndex, key } = cacheOptions;
 
         Reflect.defineMetadata(key, INTERNAL_KIND.TEMPORAL, target);
 
@@ -171,7 +171,8 @@ export const Cache =
         };
       }
 
-      if (isBust(cacheOptions)) {
+      if (isStaticBust(cacheOptions)) {
+        const {key} = cacheOptions
         descriptor.value = async function (...args: any[]) {
           const { paramIndex, bustAllChildren, addition } = cacheOptions;
           const rootKey = makeRootKey(key);
@@ -219,6 +220,14 @@ export const Cache =
 
           return result;
         };
+      }
+
+      if (isDynamicTemporal(cacheOptions)) {
+        
+      }
+
+      if (isDynamicBust(cacheOptions)) {
+
       }
       copyOriginalMetadataToCacheDescriptor(
         originalMethodMetadataKeys,

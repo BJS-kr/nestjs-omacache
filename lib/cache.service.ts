@@ -54,7 +54,7 @@ export class CacheService implements OnModuleInit {
       .flatMap(({ instance, methods }) =>
         methods.map(({ method, methodName }) => ({
           instance,
-          cacheOptions: this.reflector.get<CacheOptions<CacheKind>>(
+          cacheOptions: this.reflector.get<CacheOptions<CacheKind, boolean, false>>(
             CACHE,
             method,
           ),

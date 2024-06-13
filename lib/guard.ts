@@ -1,17 +1,27 @@
 import { CacheKind, CacheOptions } from './types';
 
 export const isPersistent = (
-  cacheOptions: CacheOptions<CacheKind>,
-): cacheOptions is CacheOptions<'persistent'> => {
-  return cacheOptions.kind === 'persistent';
+  cacheOptions: CacheOptions<CacheKind, boolean, boolean>,
+): cacheOptions is CacheOptions<'persistent', false, false> => {
+  return cacheOptions.kind === 'persistent'
 };
-export const isTemporal = (
-  cacheOptions: CacheOptions<CacheKind>,
-): cacheOptions is CacheOptions<'temporal'> => {
-  return cacheOptions.kind === 'temporal';
+export const isStaticTemporal = (
+  cacheOptions: CacheOptions<CacheKind, boolean, boolean>,
+): cacheOptions is CacheOptions<'temporal', false, false> => {
+  return cacheOptions.kind === 'temporal' && !(cacheOptions as CacheOptions<'temporal', boolean, boolean>).dynamicUrlKey;
 };
-export const isBust = (
-  cacheOptions: CacheOptions<CacheKind>,
-): cacheOptions is CacheOptions<'bust'> => {
-  return cacheOptions.kind === 'bust';
+export const isStaticBust = (
+  cacheOptions: CacheOptions<CacheKind, boolean, boolean>,
+): cacheOptions is CacheOptions<'bust', false, false> => {
+  return cacheOptions.kind === 'bust' && !(cacheOptions as CacheOptions<'bust', boolean, boolean>).dynamicUrlKey;
+};
+export const isDynamicTemporal = (
+  cacheOptions: CacheOptions<CacheKind, boolean, boolean>,
+): cacheOptions is CacheOptions<'temporal', true, true> => {
+  return cacheOptions.kind === 'temporal' && (cacheOptions as CacheOptions<'temporal', boolean, boolean>).dynamicUrlKey === true;
+};
+export const isDynamicBust = (
+  cacheOptions: CacheOptions<CacheKind, boolean, boolean>,
+): cacheOptions is CacheOptions<'bust', true, true> => {
+  return cacheOptions.kind === 'bust' && (cacheOptions as CacheOptions<'bust', boolean, boolean>).dynamicUrlKey === true;
 };

@@ -10,6 +10,9 @@ export const cacheEventEmitter = new EventEmitter();
 export const intervalTimerMap = new Map<string, boolean>();
 export const intervals: NodeJS.Timeout[] = [];
 
+// TODO
+// 1. throw error when controllerOnly cache not used with controller
+// 2. implement interceptor approach for request object when dynamic
 type RootKey = `${string}${typeof ROOT_KEY_SUFFIX}`;
 const ROOT_KEY_SUFFIX = "__ROOT_KEY__" as const;
 

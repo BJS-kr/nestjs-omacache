@@ -1,7 +1,7 @@
 import { SetMetadata } from "@nestjs/common";
 import { EventEmitter } from "events";
 import { CACHE } from "./constants";
-import { CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
+import { CacheBuildOption, CacheKind, CacheOptions, ICacheStorage, INTERNAL_KIND } from "./types";
 import { isBust, isPersistent, isTemporal } from "./guard";
 import "reflect-metadata";
 import { DefaultStorage } from "./default.storage";
@@ -92,7 +92,7 @@ function copyOriginalMetadataToCacheDescriptor(
 
 export const Cache =
   (
-    { storage }: { storage: ICacheStorage } = { storage: new DefaultStorage() }
+    { storage, controllerOnly }: CacheBuildOption = { storage: new DefaultStorage() }
   ) =>
   <Kind extends CacheKind>(cacheOptions: CacheOptions<Kind>) => {
     return (

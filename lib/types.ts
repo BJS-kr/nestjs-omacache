@@ -9,7 +9,7 @@ type CacheOptionSchema = {
     addition?: Omit<CacheOptions<"bust">, "additon" | "kind">[];
   };
 };
-
+export type CacheBuildOption = { storage: ICacheStorage, controllerOnly?:boolean }
 export const enum INTERNAL_KIND {
   PERSISTENT = 0,
   TEMPORAL = 1,

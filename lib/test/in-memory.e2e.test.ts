@@ -9,8 +9,9 @@ import { CacheModule } from "../cache.module";
 import { InMemTestController } from "./controller";
 import { intervals } from "../cache";
 import { defaultStorage } from "./cache.decorator";
+import { App } from 'supertest/types';
 
-let httpServer: HttpServer;
+let httpServer: App;
 let app: INestApplication;
 let service: InMemTestService;
 

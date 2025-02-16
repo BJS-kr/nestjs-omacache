@@ -1,16 +1,16 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { CACHE } from './constants';
-import { CacheKind, CacheOptions } from './types';
-import { cacheEventEmitter } from './cache';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
+import { InstanceWrapper } from "@nestjs/core/injector/instance-wrapper";
+import { CACHE } from "./constants";
+import { CacheKind, CacheOptions } from "./types";
+import { cacheEventEmitter } from "./cache";
 
 @Injectable()
 export class CacheService implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly scanner: MetadataScanner,
-    private readonly reflector: Reflector,
+    private readonly reflector: Reflector
   ) {}
 
   private getAllInstances() {
@@ -35,9 +35,7 @@ export class CacheService implements OnModuleInit {
         instance,
         methodNames: [
           ...new Set(
-            this.scanner.getAllFilteredMethodNames(
-              Object.getPrototypeOf(instance),
-            ),
+            this.scanner.getAllMethodNames(Object.getPrototypeOf(instance))
           ),
         ],
       }))
@@ -56,10 +54,10 @@ export class CacheService implements OnModuleInit {
           instance,
           cacheOptions: this.reflector.get<CacheOptions<CacheKind>>(
             CACHE,
-            method,
+            method
           ),
           methodName,
-        })),
+        }))
       );
   }
 
@@ -67,8 +65,8 @@ export class CacheService implements OnModuleInit {
     this.extractCacheMetadata(this.getAllInstances()).forEach(
       ({ instance, cacheOptions }) => {
         const { kind, key } = cacheOptions;
-        if (kind === 'persistent') cacheEventEmitter.emit(key, instance);
-      },
+        if (kind === "persistent") cacheEventEmitter.emit(key, instance);
+      }
     );
   }
 

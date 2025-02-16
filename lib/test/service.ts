@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { sleep } from "./util";
-import { InMemCache, RedisCache, AnotherRedisCache } from "./cache.decorator";
+import { InMemCache } from "./cache.decorator";
 import { SECOND } from "../time.constants";
 
 @Injectable()

@@ -1,6 +1,6 @@
 {
   "name": "nestjs-omacache",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "simple, flexible and powerful cache decorator factory for NestJS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,14 +16,13 @@
     "build": "rimraf dist && tsc"
   },
   "devDependencies": {
-    "@nestjs/common": "10.3.9",
-    "@nestjs/core": "10.3.9",
-    "@nestjs/platform-express": "10.3.9",
-    "@nestjs/testing": "10.3.9",
+    "@nestjs/common": "^10.3.9",
+    "@nestjs/core": "^10.3.9",
+    "@nestjs/platform-express": "^10.3.9",
+    "@nestjs/testing": "^10.3.9",
     "@types/jest": "29.5.12",
     "@types/node": "20.14.2",
     "@types/supertest": "6.0.2",
-    "redis": "^4.6.14",
     "reflect-metadata": "0.2.2",
     "rimraf": "5.0.7",
     "rxjs": "7.8.1",
@@ -32,11 +31,9 @@
     "typescript": "5.4.5"
   },
   "peerDependencies": {
-    "@nestjs/common": ">=8",
-    "@nestjs/core": ">=8",
-    "cache-manager": "<=5",
-    "reflect-metadata": "^0.1.12 || ^0.2.0",
-    "rxjs": ">= 7.x"
+    "@nestjs/common": ">=10",
+    "@nestjs/core": ">=10",
+    "reflect-metadata": "^0.2.0"
   },
   "keywords": [
     "nest",

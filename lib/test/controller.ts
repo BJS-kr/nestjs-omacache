@@ -8,10 +8,8 @@ import {
   Query,
 } from "@nestjs/common";
 import { sleep, startTime } from "./util";
-import { InMemCache, RedisCache, AnotherRedisCache } from "./cache.decorator";
-import {
-  InMemTestService,
-} from "./service";
+import { InMemCache } from "./cache.decorator";
+import { InMemTestService } from "./service";
 import { SECOND } from "../time.constants";
 @Controller()
 export class InMemTestController {

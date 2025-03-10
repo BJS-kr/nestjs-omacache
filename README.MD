@@ -8,7 +8,7 @@
 
 ## Motivation
 
-Nest's cache-manager has limitations and inconveniences(i.e. cache applied for controller only).
+Nest's cache-manager has limitations and inconveniences(i.e. cache decorator applied for controller only).
 this problem arises from the fact that @nestjs/cache-manager implements features using interceptor, so its capabilities limited within interceptor's.
 
 This package provides you full capabilities for most caching strategy on server.

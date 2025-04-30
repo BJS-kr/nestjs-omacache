@@ -32,13 +32,13 @@ const setChildCacheKey = async (
   rootKey: RootKey
 ) => {
   if (!(await storage.has(rootKey))) {
-    storage.set(rootKey, JSON.stringify({ [cacheKey]: 1 }));
+    storage.set(rootKey, { [cacheKey]: 1 });
     return;
   }
   const children = await getChildrenObject(storage, rootKey);
   if (children[cacheKey]) return;
   children[cacheKey] = 1;
-  storage.set(rootKey, JSON.stringify(children));
+  storage.set(rootKey, children);
 };
 
 const deleteChildCacheKey = async (
@@ -49,7 +49,7 @@ const deleteChildCacheKey = async (
   if (await storage.has(rootKey)) {
     const children = await getChildrenObject(storage, rootKey);
     delete children[cacheKey];
-    storage.set(rootKey, JSON.stringify(children));
+    storage.set(rootKey, children);
   }
 };
 

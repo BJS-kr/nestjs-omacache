@@ -73,7 +73,7 @@ const getChildrenObject = async (storage, rootKey) => {
     throw new Error("Invalid root key");
   }
   try {
-    return JSON.parse(await storage.get(rootKey));
+    return await storage.get(rootKey);
   } catch (e) {
     throw new Error("cannot parse children object");
   }

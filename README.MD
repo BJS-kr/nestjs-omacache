@@ -13,12 +13,9 @@ this problem arises from the fact that @nestjs/cache-manager implements features
 
 This package provides you full capabilities for most caching strategy on server.
 
-It solves:
-
-1. enables partial caching during Request-Response cycle
+1. can be applied to both controllers and services(Injectable)
 2. set-on-start caching(persistent, and can be refreshed)
-3. can be applied to both controllers and services(Injectable)
-4. key-based cache control. It gives you convenience to set and bust the cache using same key
+3. other utilites (i.e. cache invalidation with related caches)
 
 Cache option type automatically switched by 'kind' option(persistent or temporal)
 
